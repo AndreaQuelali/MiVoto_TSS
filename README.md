@@ -65,6 +65,7 @@ Para ejecutar el simulador, simplemente ejecuta el archivo principal:
 ```bash
 python src/app.py
 ```
+python run_app.py
 
 ## Uso
 
