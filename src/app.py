@@ -11,33 +11,24 @@ from reportlab.platypus import SimpleDocTemplate, Paragraph, Spacer, Image, Tabl
 from reportlab.lib.styles import getSampleStyleSheet
 from reportlab.lib import colors
 from reportlab.lib.units import inch
-from collections import defaultdict # Import defaultdict
+from collections import defaultdict
 
 class PredictorElectoral2025:
     """
     Aplicación de Escritorio para la Predicción Electoral en Bolivia 2025.
-
-    Permite cargar datos históricos y encuestas actuales, configurar parámetros
-    del modelo predictivo, visualizar resultados de votos y distribución de escaños
-    (senadores y diputados), y exportar los resultados a Excel, imágenes o PDF.
+    Incluye implementación de segunda vuelta según Ley 026.
     """
-
+    
     def __init__(self, root):
-        """
-        Inicializa la aplicación Predictor Electoral 2025.
-
-        Args:
-            root (tk.Tk): La ventana principal de Tkinter.
-        """
         self.root = root
         self.root.title("Predictor Electoral Bolivia 2025")
         self.root.geometry("1400x950")
-        self.root.option_add('*tearOff', False) # Evita que los menús se separen
+        self.root.option_add('*tearOff', False)
 
         # Configuración de estilos visuales
         self.configurar_estilos()
 
-        # Datos históricos de elecciones en Bolivia (ejemplo inicial)
+        # Datos históricos de elecciones en Bolivia
         self.datos_historicos = {
             '2005': {'MAS': 53.7, 'PODEMOS': 28.6, 'UN': 7.8, 'MNR': 6.5, 'Otros': 3.4},
             '2009': {'MAS': 64.2, 'PPB-CN': 26.5, 'UN': 5.7, 'Otros': 3.6},
@@ -46,55 +37,52 @@ class PredictorElectoral2025:
             '2020': {'MAS': 55.1, 'CC': 28.8, 'Creemos': 14.0, 'FPV': 1.6, 'Otros': 0.5}
         }
 
-        # Encuestas 2025 (datos de ejemplo - idealmente cargados externamente)
+        # Encuestas 2025
         self.encuestas_2025 = {
             'Encuesta1': {'MAS': 48.0, 'CC': 32.0, 'Creemos': 15.0, 'FPV': 3.0, 'Nuevo': 2.0},
             'Encuesta2': {'MAS': 45.0, 'CC': 35.0, 'Creemos': 12.0, 'FPV': 5.0, 'Nuevo': 3.0},
             'Encuesta3': {'MAS': 50.0, 'CC': 30.0, 'Creemos': 13.0, 'FPV': 4.0, 'Nuevo': 3.0}
         }
 
-        # Configuración electoral (fijas para el contexto boliviano)
+        # Configuración electoral
         self.total_senadores = 36
         self.total_diputados = 130
-        self.umbral_minimo = 0.03  # 3% mínimo para representación parlamentaria en Bolivia
+        self.umbral_minimo = 0.03
 
-        # Variables del modelo predictivo (valores iniciales)
-        self.peso_historico = 0.4  # Ponderación para datos históricos
-        self.peso_encuestas = 0.6  # Ponderación para encuestas actuales
-        self.margen_error_prediccion = 0.03 # 3% de margen de error inicial
-        self.tendencia_ajuste = "Conservar" # Tipo de ajuste de tendencia
+        # Variables del modelo predictivo
+        self.peso_historico = 0.4
+        self.peso_encuestas = 0.6
+        self.margen_error_prediccion = 0.03
+        self.tendencia_ajuste = "Conservar"
 
         # Resultados de la predicción
         self.prediccion_2025 = {}
         self.senadores_2025 = {}
         self.diputados_2025 = {}
-        self.prediccion_ejecutada = False # Bandera para saber si se ha corrido la predicción
+        self.prediccion_ejecutada = False
+        
+        # Variables para segunda vuelta
+        self.segunda_vuelta = False
+        self.candidatos_segunda_vuelta = []
+        self.prediccion_segunda_vuelta = {}
 
-        # Inicializar la interfaz gráfica del usuario
+        # Inicializar la interfaz gráfica
         self.inicializar_interfaz()
-        # Cargar los datos iniciales en las Treeviews al inicio
         self.actualizar_tablas_datos()
 
-
     def configurar_estilos(self):
-        """
-        Configura los estilos visuales (temas, fuentes, colores) de la aplicación Tkinter
-        para una apariencia moderna y consistente.
-        """
+        """Configura los estilos visuales de la aplicación."""
         self.style = ttk.Style()
-        self.style.theme_use('clam') # Tema 'clam' es más personalizable
-
-        # Colores
-        primary_color = '#3498db' # Azul
-        secondary_color = '#2c3e50' # Gris oscuro
-        accent_color = '#e74c3c' # Rojo para acentos
-        bg_color = '#ecf0f1' # Gris claro para fondo
+        self.style.theme_use('clam')
+        
+        primary_color = '#3498db'
+        secondary_color = '#2c3e50'
+        accent_color = '#e74c3c'
+        bg_color = '#ecf0f1'
         text_color = '#2c3e50'
 
-        # FIX: ttk.Frame cannot take 'background' directly. Configure it via style.
-        # Ensure 'TFrame' style is configured before frames are created.
         self.style.configure('.', background=bg_color, foreground=text_color, font=('Arial', 10))
-        self.style.configure('TFrame', background=bg_color) # This is the key fix for ttk.Frame background
+        self.style.configure('TFrame', background=bg_color)
         self.style.configure('TLabel', background=bg_color, foreground=text_color)
         self.style.configure('Header.TLabel', font=('Arial', 16, 'bold'), foreground=primary_color)
         self.style.configure('Subheader.TLabel', font=('Arial', 12, 'bold'), foreground=secondary_color)
@@ -104,55 +92,108 @@ class PredictorElectoral2025:
         self.style.configure('TNotebook', background=bg_color, borderwidth=0)
         self.style.configure('TNotebook.Tab', background=secondary_color, foreground='white', padding=[10, 5])
         self.style.map('TNotebook.Tab',
-                        background=[('selected', primary_color)],
-                        foreground=[('selected', 'white')])
+                      background=[('selected', primary_color)],
+                      foreground=[('selected', 'white')])
 
         self.style.configure('TLabelframe', background=bg_color, foreground=primary_color)
         self.style.configure('TLabelframe.Label', font=('Arial', 12, 'bold'), foreground=primary_color)
 
         self.style.configure('Treeview',
-                             background="#ffffff",
-                             foreground="#333333",
-                             fieldbackground="#ffffff",
-                             font=('Arial', 9))
+                           background="#ffffff",
+                           foreground="#333333",
+                           fieldbackground="#ffffff",
+                           font=('Arial', 9))
         self.style.map('Treeview',
-                        background=[('selected', primary_color)])
+                      background=[('selected', primary_color)])
         self.style.configure('Treeview.Heading',
-                             font=('Arial', 10, 'bold'),
-                             background=secondary_color,
-                             foreground='white')
+                           font=('Arial', 10, 'bold'),
+                           background=secondary_color,
+                           foreground='white')
 
+    def verificar_segunda_vuelta(self, votos):
+        """
+        Verifica si se requiere segunda vuelta según la Ley 026 de Bolivia.
+        
+        Args:
+            votos (dict): Diccionario con los porcentajes de votos por partido
+            
+        Returns:
+            bool: True si se requiere segunda vuelta, False si hay ganador en primera vuelta
+            list: Lista con los dos partidos que pasan a segunda vuelta (si aplica)
+        """
+        votos_ordenados = sorted(votos.items(), key=lambda item: item[1], reverse=True)
+        
+        # Caso 1: Mayoría absoluta (50% + 1)
+        if votos_ordenados[0][1] > 50.0:
+            return False, []
+            
+        # Caso 2: 40% con 10% de diferencia
+        if len(votos_ordenados) >= 2:
+            if votos_ordenados[0][1] >= 40.0 and (votos_ordenados[0][1] - votos_ordenados[1][1]) >= 10.0:
+                return False, []
+        
+        # Si no cumple ninguno de los casos anteriores, hay segunda vuelta
+        return True, [votos_ordenados[0][0], votos_ordenados[1][0]]
+
+    def simular_segunda_vuelta(self):
+        """
+        Simula los resultados de la segunda vuelta electoral.
+        """
+        if not self.segunda_vuelta or len(self.candidatos_segunda_vuelta) < 2:
+            return
+            
+        # Redistribuir votos considerando solo los dos partidos principales
+        total_votos = sum(self.prediccion_2025.values())
+        votos_primer_lugar = self.prediccion_2025[self.candidatos_segunda_vuelta[0]]
+        votos_segundo_lugar = self.prediccion_2025[self.candidatos_segunda_vuelta[1]]
+        
+        # Calcular porcentaje de votos no asignados a estos dos partidos
+        otros_votos = total_votos - votos_primer_lugar - votos_segundo_lugar
+        
+        # Simular redistribución (70% al primero, 30% al segundo como ejemplo)
+        votos_primer_lugar += otros_votos * 0.7
+        votos_segundo_lugar += otros_votos * 0.3
+        
+        # Actualizar predicción para mostrar solo los dos candidatos
+        self.prediccion_segunda_vuelta = {
+            self.candidatos_segunda_vuelta[0]: votos_primer_lugar,
+            self.candidatos_segunda_vuelta[1]: votos_segundo_lugar
+        }
+        
+        # Determinar ganador
+        if votos_primer_lugar > votos_segundo_lugar:
+            ganador = self.candidatos_segunda_vuelta[0]
+        else:
+            ganador = self.candidatos_segunda_vuelta[1]
+            
+        messagebox.showinfo("Resultado Segunda Vuelta", 
+                          f"Ganador de la segunda vuelta: {ganador}\n\n"
+                          f"{self.candidatos_segunda_vuelta[0]}: {votos_primer_lugar:.1f}%\n"
+                          f"{self.candidatos_segunda_vuelta[1]}: {votos_segundo_lugar:.1f}%")
 
     def inicializar_interfaz(self):
-        """
-        Crea y organiza los componentes principales de la interfaz gráfica del usuario,
-        incluyendo el Notebook con las diferentes pestañas.
-        """
-        # Notebook principal para organizar las secciones
+        """Crea y organiza los componentes principales de la interfaz gráfica."""
         self.notebook = ttk.Notebook(self.root)
         self.notebook.pack(fill='both', expand=True, padx=10, pady=10)
 
-        # Crear y añadir las pestañas
         self.crear_pestana_introduccion()
         self.crear_pestana_datos()
         self.crear_pestana_modelo()
         self.crear_pestana_resultados()
         self.crear_pestana_exportacion()
 
-        # Seleccionar la pestaña de introducción al inicio
         self.notebook.select(0)
-
-        # Disable results and export tabs initially
         self.notebook.tab(self.resultados_frame, state='disabled')
         self.notebook.tab(self.exportacion_frame, state='disabled')
 
-
     def crear_pestana_introduccion(self):
-        """Crea la pestaña de introducción con información general del proyecto."""
+        """Crea la pestaña de introducción con información general."""
         self.intro_frame = ttk.Frame(self.notebook, padding="15 15 15 15")
         self.notebook.add(self.intro_frame, text="Introducción")
 
-        ttk.Label(self.intro_frame, text="MODELO MATEMÁTICO PARA LAS ELECCIONES GENERALES EN BOLIVIA 2025", style='Header.TLabel', wraplength=800, justify='center').pack(pady=(20, 10))
+        ttk.Label(self.intro_frame, 
+                 text="MODELO MATEMÁTICO PARA LAS ELECCIONES GENERALES EN BOLIVIA 2025", 
+                 style='Header.TLabel', wraplength=800, justify='center').pack(pady=(20, 10))
         ttk.Label(self.intro_frame, text="Taller de Simulación de Sistemas", style='Subheader.TLabel').pack(pady=5)
         ttk.Label(self.intro_frame, text="UNIVERSIDAD MAYOR DE SAN SIMON", font=('Arial', 11, 'italic')).pack(pady=(0, 20))
 
@@ -169,7 +210,6 @@ class PredictorElectoral2025:
         """
         ttk.Label(self.intro_frame, text=intro_text, wraplength=750, justify='left', font=('Arial', 10)).pack(pady=10)
 
-
     def crear_pestana_datos(self):
         """
         Crea la pestaña para la visualización y gestión de datos históricos y de encuestas.
@@ -182,15 +222,9 @@ class PredictorElectoral2025:
         main_frame = ttk.Frame(self.datos_frame)
         main_frame.pack(fill='both', expand=True)
 
-        # Removed 'background' from Canvas, it's not a ttk widget.
-        # It's better to manage its background via tk.Canvas directly if needed,
-        # but for scrollable_frame, it will pick up the 'TFrame' style.
-        canvas = tk.Canvas(main_frame) # Removed background=self.style.lookup(...)
+        canvas = tk.Canvas(main_frame)
         scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
-        
-        # FIX: The background for ttk.Frame is set via self.style.configure('TFrame', background=bg_color)
-        # So, no need to pass it here. It will automatically inherit.
-        scrollable_frame = ttk.Frame(canvas) # Removed background=self.style.lookup(...)
+        scrollable_frame = ttk.Frame(canvas)
 
         scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
@@ -205,14 +239,14 @@ class PredictorElectoral2025:
         # Sección de datos históricos
         self.frame_historicos = ttk.LabelFrame(scrollable_frame, text="Resultados Históricos de Elecciones en Bolivia")
         self.frame_historicos.pack(fill='x', padx=10, pady=5, ipadx=5, ipady=5)
-        self.tree_historicos = None # Se inicializa más tarde
-        self.canvas_historicos = None # Se inicializa más tarde
+        self.tree_historicos = None
+        self.canvas_historicos = None
 
         # Sección de encuestas 2025
         self.frame_encuestas = ttk.LabelFrame(scrollable_frame, text="Encuestas de Intención de Voto 2025")
         self.frame_encuestas.pack(fill='x', padx=10, pady=5, ipadx=5, ipady=5)
-        self.tree_encuestas = None # Se inicializa más tarde
-        self.canvas_encuestas = None # Se inicializa más tarde
+        self.tree_encuestas = None
+        self.canvas_encuestas = None
 
         # Botones para cargar nuevos datos
         btn_frame = ttk.Frame(scrollable_frame)
@@ -222,7 +256,7 @@ class PredictorElectoral2025:
         ttk.Button(btn_frame, text="Cargar Datos Históricos (CSV/Excel)",
                    command=self.cargar_historicos).pack(side='left', padx=10)
 
-        self.actualizar_tablas_datos() # Llenar las tablas y gráficos iniciales
+        self.actualizar_tablas_datos()
 
     def actualizar_tablas_datos(self):
         """
@@ -238,7 +272,7 @@ class PredictorElectoral2025:
                     widget.get_tk_widget().destroy()
                 else:
                     widget.destroy()
-        plt.close('all') # Cierra todas las figuras de matplotlib
+        plt.close('all')
 
         self._crear_tabla_historicos(self.frame_historicos)
         self._crear_grafico_historicos(self.frame_historicos)
@@ -272,7 +306,6 @@ class PredictorElectoral2025:
         vsb.pack(side='right', fill='y', in_=self.tree_historicos.winfo_parent())
         self.tree_historicos.configure(yscrollcommand=vsb.set)
 
-
     def _crear_grafico_historicos(self, parent_frame):
         """Crea el gráfico de líneas para la evolución histórica de votos."""
         if not self.datos_historicos:
@@ -285,7 +318,7 @@ class PredictorElectoral2025:
 
         for party in all_parties:
             percentages = [self.datos_historicos.get(year, {}).get(party, 0) for year in years]
-            if any(p > 0 for p in percentages): # Solo trazar si el partido tiene votos
+            if any(p > 0 for p in percentages):
                 ax_hist.plot(years, percentages, 'o-', label=party)
 
         ax_hist.set_title("Evolución Histórica de Votación por Partido")
@@ -293,7 +326,7 @@ class PredictorElectoral2025:
         ax_hist.set_xlabel("Año Electoral")
         ax_hist.legend(loc='center left', bbox_to_anchor=(1, 0.5), fontsize='small')
         ax_hist.grid(True, linestyle='--', alpha=0.7)
-        fig_hist.tight_layout() # Ajustar el diseño para evitar que la leyenda se superponga
+        fig_hist.tight_layout()
 
         self.canvas_historicos = FigureCanvasTkAgg(fig_hist, master=parent_frame)
         self.canvas_historicos.draw()
@@ -344,13 +377,13 @@ class PredictorElectoral2025:
         parties = list(sorted_promedios.keys())
         percentages = list(sorted_promedios.values())
 
-        bars = ax_enc.bar(parties, percentages, color='#2ecc71') # Verde
+        bars = ax_enc.bar(parties, percentages, color='#2ecc71')
 
         ax_enc.set_title("Promedio de Encuestas 2025")
         ax_enc.set_ylabel("Porcentaje de Votos (%)")
         ax_enc.set_xlabel("Partido Político")
         ax_enc.grid(True, linestyle='--', alpha=0.7, axis='y')
-        ax_enc.set_ylim(0, 100) # Asegurar que el eje Y vaya de 0 a 100
+        ax_enc.set_ylim(0, 100)
 
         # Mostrar valor sobre cada barra
         for bar in bars:
@@ -363,7 +396,6 @@ class PredictorElectoral2025:
         self.canvas_encuestas = FigureCanvasTkAgg(fig_enc, master=parent_frame)
         self.canvas_encuestas.draw()
         self.canvas_encuestas.get_tk_widget().pack(fill='both', expand=True, padx=10, pady=10)
-
 
     def cargar_encuestas(self):
         """
@@ -388,26 +420,20 @@ class PredictorElectoral2025:
             encuestas_cargadas = {}
             for idx, row in df.iterrows():
                 encuesta_nombre = str(row['Encuesta'])
-                # Asegurarse de que el resto de columnas son partidos y son numéricas
-                # Convertir a float y manejar NaN para partidos no presentes en todas encuestas
                 partido_data = {col: float(row[col]) if pd.notna(row[col]) else 0.0 for col in df.columns if col != 'Encuesta'}
                 
-                # Check if there are any parties in the data
                 if not partido_data:
                     raise ValueError(f"La encuesta '{encuesta_nombre}' no contiene datos de partidos.")
 
-                # Ensure percentages sum to 100 with a small tolerance
                 current_sum = sum(partido_data.values())
-                if abs(current_sum - 100) > 0.1: # Tolerancia de 0.1 para suma del 100%
-                    # Optional: normalize if sum is slightly off
-                    # partido_data = {p: (v / current_sum) * 100 for p, v in partido_data.items()}
+                if abs(current_sum - 100) > 0.1:
                     messagebox.showwarning("Advertencia de Formato", f"Los porcentajes de la encuesta '{encuesta_nombre}' no suman exactamente 100%. Suma actual: {current_sum:.1f}%. Se utilizarán los valores tal cual.")
                 
                 encuestas_cargadas[encuesta_nombre] = partido_data
 
             self.encuestas_2025 = encuestas_cargadas
             messagebox.showinfo("Éxito", f"Encuestas cargadas correctamente desde '{os.path.basename(file_path)}'.")
-            self.actualizar_tablas_datos() # Refrescar la visualización
+            self.actualizar_tablas_datos()
         except ValueError as ve:
             messagebox.showerror("Error de Formato", str(ve))
         except Exception as e:
@@ -435,9 +461,7 @@ class PredictorElectoral2025:
 
             historicos_cargados = {}
             for idx, row in df.iterrows():
-                # Convertir el año a string entero (por ejemplo, '2020') sin decimales
                 año = str(int(float(row['Año'])))
-                # Asegurarse de que el resto de columnas son partidos y son numéricas
                 partido_data = {col: float(row[col]) if pd.notna(row[col]) else 0.0 for col in df.columns if col != 'Año'}
                 if not partido_data:
                     raise ValueError(f"Los datos históricos del año '{año}' no contienen datos de partidos.")
@@ -448,7 +472,7 @@ class PredictorElectoral2025:
 
             self.datos_historicos = historicos_cargados
             messagebox.showinfo("Éxito", f"Datos históricos cargados correctamente desde '{os.path.basename(file_path)}'.")
-            self.actualizar_tablas_datos() # Refrescar la visualización
+            self.actualizar_tablas_datos()
         except ValueError as ve:
             messagebox.showerror("Error de Formato", str(ve))
         except Exception as e:
@@ -465,12 +489,9 @@ class PredictorElectoral2025:
         main_frame = ttk.Frame(self.modelo_frame)
         main_frame.pack(fill='both', expand=True)
 
-        # Removed 'background' from Canvas, it's not a ttk widget.
-        canvas = tk.Canvas(main_frame) # Removed background=self.style.lookup(...)
+        canvas = tk.Canvas(main_frame)
         scrollbar = ttk.Scrollbar(main_frame, orient="vertical", command=canvas.yview)
-        
-        # FIX: The background for ttk.Frame is set via self.style.configure('TFrame', background=bg_color)
-        scrollable_frame = ttk.Frame(canvas) # Removed background=self.style.lookup(...)
+        scrollable_frame = ttk.Frame(canvas)
 
         scrollable_frame.bind("<Configure>", lambda e: canvas.configure(scrollregion=canvas.bbox("all")))
         canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
@@ -500,8 +521,7 @@ class PredictorElectoral2025:
         self.peso_enc_label = ttk.Label(frame_ponderacion, textvariable=self.peso_enc_var, width=5, anchor='e')
         self.peso_enc_label.grid(row=1, column=2, padx=5, pady=5)
 
-        frame_ponderacion.columnconfigure(1, weight=1) # Permite que la escala se expanda
-
+        frame_ponderacion.columnconfigure(1, weight=1)
 
         # Sección de variables de ajuste
         frame_ajuste = ttk.LabelFrame(scrollable_frame, text="Variables de Ajuste Fino")
@@ -512,7 +532,6 @@ class PredictorElectoral2025:
         self.margen_error_spinbox = ttk.Spinbox(frame_ajuste, from_=0, to=10, increment=0.1, textvariable=self.margen_error_var, width=5)
         self.margen_error_spinbox.grid(row=0, column=1, padx=5, pady=5, sticky='ew')
         ttk.Label(frame_ajuste, text="%").grid(row=0, column=2, padx=2, pady=5, sticky='w')
-
 
         ttk.Label(frame_ajuste, text="Tendencia histórica:", anchor='w').grid(row=1, column=0, padx=5, pady=5, sticky='ew')
         self.tendencia_var = tk.StringVar(value=self.tendencia_ajuste)
@@ -529,14 +548,12 @@ class PredictorElectoral2025:
 
         frame_ajuste.columnconfigure(1, weight=1)
 
-
         # Botón para ejecutar predicción
         ttk.Button(scrollable_frame, text="EJECUTAR PREDICCIÓN ELECTORAL 2025",
                    command=self.ejecutar_prediccion, style='TButton').pack(pady=30, ipadx=20, ipady=10)
 
     def _update_pesos(self, event=None):
         """Ajusta automáticamente el peso de la otra escala para que la suma sea 100%."""
-        # Determine which scale was moved
         if event == self.peso_hist_scale:
             current_hist_weight = self.peso_hist_var.get()
             self.peso_enc_var.set(100 - current_hist_weight)
@@ -549,9 +566,7 @@ class PredictorElectoral2025:
 
     def ejecutar_prediccion(self):
         """
-        Ejecuta el modelo predictivo, combinando datos históricos y de encuestas
-        con los parámetros configurados por el usuario. Calcula la distribución
-        de votos y escaños, y luego muestra los resultados.
+        Ejecuta el modelo predictivo, incluyendo verificación de segunda vuelta.
         """
         try:
             if not self.datos_historicos or not self.encuestas_2025:
@@ -568,22 +583,17 @@ class PredictorElectoral2025:
                 messagebox.showerror("Error de Parámetros", "La suma de los pesos de datos históricos y encuestas no puede ser cero.")
                 return
 
-            # Normalizar pesos por si el usuario los manipula por separado
             total_pesos = self.peso_historico + self.peso_encuestas
-            if total_pesos > 0: # Avoid division by zero if both weights are 0
+            if total_pesos > 0:
                 self.peso_historico /= total_pesos
                 self.peso_encuestas /= total_pesos
 
-
-            # Obtener datos históricos más recientes (asumiendo el último año)
-            # Ensure years are integers for correct sorting if they are strings
             ultimos_años_historicos_keys = sorted([int(float(y)) for y in self.datos_historicos.keys()], reverse=True)
             if not ultimos_años_historicos_keys:
                 messagebox.showerror("Error de Datos", "No hay datos históricos disponibles.")
                 return
             datos_historicos_recientes = self.datos_historicos[str(ultimos_años_historicos_keys[0])]
 
-            # Calcular promedio de encuestas 2025
             all_parties = set(datos_historicos_recientes.keys()).union(*[e.keys() for e in self.encuestas_2025.values()])
             promedios_encuestas_2025 = {}
 
@@ -597,28 +607,20 @@ class PredictorElectoral2025:
                 hist_val = datos_historicos_recientes.get(p, 0)
                 enc_val = promedios_encuestas_2025.get(p, 0)
 
-                # Aplicar ponderación
                 prediccion_base = (hist_val * self.peso_historico) + (enc_val * self.peso_encuestas)
 
-                # Aplicar ajuste de tendencia (simplificado)
                 if self.tendencia_ajuste == "Acentuar":
-                    # Si un partido ha subido históricamente o en encuestas, acentuar un poco más
-                    # Esto es una simplificación, un modelo real usaría regresión
                     if enc_val > hist_val:
-                        prediccion_base *= 1.05 # Aumenta un 5% si está en tendencia positiva
+                        prediccion_base *= 1.05
                     elif enc_val < hist_val:
-                        prediccion_base *= 0.95 # Disminuye un 5% si está en tendencia negativa
+                        prediccion_base *= 0.95
                 elif self.tendencia_ajuste == "Suavizar":
-                    # Disminuir la diferencia entre histórico y encuestas
-                    prediccion_base = (hist_val + enc_val) / 2 # Un promedio simple para suavizar
+                    prediccion_base = (hist_val + enc_val) / 2
 
-                # Aplicar margen de error (variación aleatoria)
                 variacion = np.random.uniform(-self.margen_error_prediccion, self.margen_error_prediccion)
-                prediccion = max(0, prediccion_base * (1 + variacion)) # Asegurarse que no sea negativo
-
+                prediccion = max(0, prediccion_base * (1 + variacion))
                 self.prediccion_2025[p] = prediccion
 
-            # Normalizar los porcentajes para que sumen exactamente 100%
             total_prediccion = sum(self.prediccion_2025.values())
             if total_prediccion > 0:
                 self.prediccion_2025 = {p: (v / total_prediccion) * 100 for p, v in self.prediccion_2025.items()}
@@ -626,14 +628,19 @@ class PredictorElectoral2025:
                 messagebox.showwarning("Advertencia", "La predicción de votos resultó en 0 para todos los partidos. Revise sus datos y parámetros.")
                 return
 
+            # Verificar si se requiere segunda vuelta
+            self.segunda_vuelta, self.candidatos_segunda_vuelta = self.verificar_segunda_vuelta(self.prediccion_2025)
+            
+            if self.segunda_vuelta:
+                messagebox.showinfo("Segunda Vuelta", 
+                                  f"Se requerirá segunda vuelta entre {self.candidatos_segunda_vuelta[0]} y {self.candidatos_segunda_vuelta[1]}")
 
             # Calcular escaños
             self.calcular_escanos()
 
-            # Marcar predicción como ejecutada y mostrar resultados
             self.prediccion_ejecutada = True
             self.notebook.tab(self.resultados_frame, state='normal')
-            self.notebook.tab(self.exportacion_frame, state='normal') # Enable export tab
+            self.notebook.tab(self.exportacion_frame, state='normal')
             self.notebook.select(self.resultados_frame)
             self.mostrar_resultados()
             messagebox.showinfo("Predicción Completa", "El modelo predictivo ha sido ejecutado exitosamente. ¡Consulte la pestaña de Resultados!")
@@ -648,8 +655,6 @@ class PredictorElectoral2025:
         Calcula la distribución de escaños para senadores y diputados
         utilizando el método D'Hondt, considerando el umbral mínimo de votos.
         """
-        # Filtrar partidos que superan el umbral mínimo de votos
-        # Se convierte a un valor absoluto (0-100) para el umbral
         partidos_validos_votos = {p: v for p, v in self.prediccion_2025.items()
                                   if v >= (self.umbral_minimo * 100)}
 
@@ -659,8 +664,6 @@ class PredictorElectoral2025:
             messagebox.showwarning("Advertencia", "Ningún partido alcanzó el umbral mínimo de votos para obtener escaños.")
             return
 
-        # Normalizar los votos de los partidos válidos para que sumen 100% para el cálculo de D'Hondt
-        # Esto es crucial, ya que los escaños se distribuyen solo entre los que pasan el umbral
         total_votos_validos = sum(partidos_validos_votos.values())
         if total_votos_validos == 0:
             self.senadores_2025 = {}
@@ -674,38 +677,25 @@ class PredictorElectoral2025:
         self.senadores_2025 = self._calcular_dhondt(votos_normalizados, self.total_senadores)
 
         # Calcular escaños para Diputados (método D'Hondt)
-        # Nota: En Bolivia, los diputados se asignan por circunscripción y plurinominal.
-        # Una simplificación para este modelo es aplicar D'Hondt al total.
-        # Un modelo más complejo requeriría datos por circunscripción.
         self.diputados_2025 = self._calcular_dhondt(votos_normalizados, self.total_diputados)
 
     def _calcular_dhondt(self, votos_partidos, total_escanos):
         """
         Implementa el método D'Hondt para la asignación de escaños.
-
-        Args:
-            votos_partidos (dict): Diccionario con el porcentaje de votos (0-1) por partido.
-            total_escanos (int): Número total de escaños a distribuir.
-
-        Returns:
-            dict: Diccionario con el número de escaños asignados a cada partido.
         """
         escanos = defaultdict(int)
         cocientes = {}
 
-        # Inicializar cocientes
         for partido, votos in votos_partidos.items():
-            cocientes[partido] = votos / 1 # Primera división
+            cocientes[partido] = votos / 1
 
         for _ in range(total_escanos):
             if not cocientes:
-                break # No hay más partidos con cocientes para asignar escaños
+                break
 
-            # Encontrar el partido con el cociente más alto
             ganador_escanio = max(cocientes, key=cocientes.get)
             escanos[ganador_escanio] += 1
 
-            # Recalcular el cociente para el partido ganador
             escanos_actuales = escanos[ganador_escanio]
             votos_originales = votos_partidos[ganador_escanio]
             cocientes[ganador_escanio] = votos_originales / (escanos_actuales + 1)
@@ -713,8 +703,7 @@ class PredictorElectoral2025:
 
     def crear_pestana_resultados(self):
         """
-        Crea la pestaña de resultados, mostrando la predicción de votos y la
-        distribución de escaños en tablas y gráficos.
+        Crea la pestaña de resultados con opción para segunda vuelta.
         """
         self.resultados_frame = ttk.Frame(self.notebook, padding="10")
         self.notebook.add(self.resultados_frame, text="Resultados de Predicción")
@@ -734,7 +723,7 @@ class PredictorElectoral2025:
         scrollbar.pack(side="right", fill="y")
 
         ttk.Label(scrollable_frame, text="Resultados de la Predicción Electoral 2025",
-                  style='Header.TLabel').pack(pady=(10, 20))
+                 style='Header.TLabel').pack(pady=(10, 20))
 
         # Sección de resultados de votos
         self.frame_votos = ttk.LabelFrame(scrollable_frame, text="Predicción de Votos 2025")
@@ -754,30 +743,40 @@ class PredictorElectoral2025:
         self.tree_diputados = None
         self.canvas_diputados = None
 
-        # Botón para refrescar resultados (útil si se cambia de pestaña sin volver a ejecutar)
+        # Botón para simular segunda vuelta si aplica
+        self.btn_segunda_vuelta = ttk.Button(scrollable_frame, 
+                                           text="Simular Segunda Vuelta", 
+                                           command=self.simular_segunda_vuelta,
+                                           state='disabled')
+        self.btn_segunda_vuelta.pack(pady=10)
+
+        # Botón para refrescar resultados
         ttk.Button(scrollable_frame, text="Actualizar Vista de Resultados", command=self.mostrar_resultados).pack(pady=15)
 
     def mostrar_resultados(self):
-        """
-        Muestra los resultados de la predicción en las tablas y gráficos de la pestaña de resultados.
-        Se llama después de ejecutar la predicción.
-        """
+        """Muestra los resultados de la predicción, incluyendo opción para segunda vuelta."""
         if not self.prediccion_ejecutada:
             ttk.Label(self.resultados_frame, text="Ejecute el modelo en la pestaña 'Configuración del Modelo' para ver los resultados.",
-                      style='Subheader.TLabel').pack(pady=50)
+                     style='Subheader.TLabel').pack(pady=50)
             return
+
+        # Actualizar estado del botón de segunda vuelta
+        if self.segunda_vuelta:
+            self.btn_segunda_vuelta.config(state='normal')
+        else:
+            self.btn_segunda_vuelta.config(state='disabled')
 
         # Limpiar widgets existentes
         from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
         for widget in [self.tree_votos, self.canvas_votos,
-                       self.tree_senadores, self.canvas_senadores,
-                       self.tree_diputados, self.canvas_diputados]:
+                      self.tree_senadores, self.canvas_senadores,
+                      self.tree_diputados, self.canvas_diputados]:
             if widget:
                 if isinstance(widget, FigureCanvasTkAgg):
                     widget.get_tk_widget().destroy()
                 else:
                     widget.destroy()
-        plt.close('all') # Cierra todas las figuras de matplotlib
+        plt.close('all')
 
         self._crear_tabla_votos(self.frame_votos)
         self._crear_grafico_votos(self.frame_votos)
@@ -787,7 +786,6 @@ class PredictorElectoral2025:
 
         self._crear_tabla_escanos(self.frame_diputados, self.diputados_2025)
         self._crear_grafico_escanos(self.frame_diputados, self.diputados_2025, "Diputados")
-
 
     def _crear_tabla_votos(self, parent_frame):
         """Crea la Treeview para mostrar la predicción de votos."""
@@ -803,7 +801,6 @@ class PredictorElectoral2025:
             self.tree_votos.heading(col, text=col)
             self.tree_votos.column(col, width=150, anchor='center')
 
-        # Ordenar por porcentaje de votos
         sorted_votos = sorted(self.prediccion_2025.items(), key=lambda item: item[1], reverse=True)
         for party, percentage in sorted_votos:
             self.tree_votos.insert('', 'end', values=(party, f"{percentage:.2f}%"))
@@ -817,18 +814,17 @@ class PredictorElectoral2025:
         parties = list(self.prediccion_2025.keys())
         percentages = list(self.prediccion_2025.values())
 
-        # Ordenar para el gráfico
         sorted_indices = np.argsort(percentages)[::-1]
         parties = np.array(parties)[sorted_indices]
         percentages = np.array(percentages)[sorted_indices]
 
-        bars = ax_votos.bar(parties, percentages, color='#3498db') # Azul primario
+        bars = ax_votos.bar(parties, percentages, color='#3498db')
 
         ax_votos.set_title("Predicción de Votos para Elecciones 2025")
         ax_votos.set_ylabel("Porcentaje de Votos (%)")
         ax_votos.set_xlabel("Partido Político")
         ax_votos.grid(True, linestyle='--', alpha=0.7, axis='y')
-        ax_votos.set_ylim(0, max(percentages) * 1.2 if percentages.size > 0 else 100) # Ajustar límite Y
+        ax_votos.set_ylim(0, max(percentages) * 1.2 if percentages.size > 0 else 100)
 
         for bar in bars:
             height = bar.get_height()
@@ -855,7 +851,6 @@ class PredictorElectoral2025:
             self.current_tree_escanos.heading(col, text=col)
             self.current_tree_escanos.column(col, width=150, anchor='center')
 
-        # Ordenar por número de escaños
         sorted_escanos = sorted(escanos_data.items(), key=lambda item: item[1], reverse=True)
         for party, seats in sorted_escanos:
             self.current_tree_escanos.insert('', 'end', values=(party, seats))
@@ -869,18 +864,17 @@ class PredictorElectoral2025:
         parties = list(escanos_data.keys())
         seats = list(escanos_data.values())
 
-        # Ordenar para el gráfico
         sorted_indices = np.argsort(seats)[::-1]
         parties = np.array(parties)[sorted_indices]
         seats = np.array(seats)[sorted_indices]
 
-        bars = ax_escanos.bar(parties, seats, color='#e74c3c') # Rojo acento
+        bars = ax_escanos.bar(parties, seats, color='#e74c3c')
 
         ax_escanos.set_title(f"Distribución de {title_suffix} por Partido")
         ax_escanos.set_ylabel(f"Número de {title_suffix}")
         ax_escanos.set_xlabel("Partido Político")
         ax_escanos.grid(True, linestyle='--', alpha=0.7, axis='y')
-        ax_escanos.set_ylim(0, max(seats) * 1.2 if seats.size > 0 else 10) # Ajustar límite Y
+        ax_escanos.set_ylim(0, max(seats) * 1.2 if seats.size > 0 else 10)
 
         for bar in bars:
             height = bar.get_height()
@@ -892,7 +886,6 @@ class PredictorElectoral2025:
         canvas_escanos = FigureCanvasTkAgg(fig_escanos, master=parent_frame)
         canvas_escanos.draw()
         canvas_escanos.get_tk_widget().pack(fill='both', expand=True, padx=10, pady=10)
-
 
     def crear_pestana_exportacion(self):
         """
@@ -1012,10 +1005,9 @@ class PredictorElectoral2025:
             ax_votos.set_ylim(0, max(percentages) * 1.2 if percentages.size > 0 else 100)
             fig_votos.tight_layout()
             
-            # Save plot to a temporary image file
             img_path_votos = "temp_votos_prediccion.png"
             fig_votos.savefig(img_path_votos, dpi=100)
-            plt.close(fig_votos) # Close the plot to free memory
+            plt.close(fig_votos)
 
             elements.append(Image(img_path_votos, width=6 * inch, height=3 * inch))
             elements.append(Spacer(1, 0.4 * inch))
@@ -1103,7 +1095,6 @@ class PredictorElectoral2025:
 
             elements.append(Image(img_path_diputados, width=6 * inch, height=3 * inch))
             elements.append(Spacer(1, 0.4 * inch))
-
 
             doc.build(elements)
             messagebox.showinfo("Éxito", f"Informe PDF generado en '{os.path.basename(file_path)}' exitosamente.")
