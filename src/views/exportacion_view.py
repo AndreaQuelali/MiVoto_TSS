@@ -1,8 +1,8 @@
 """
 Vista para la exportación de resultados
 """
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+import customtkinter as ctk
+from tkinter import filedialog, messagebox
 from typing import Dict, Callable
 
 from utils.file_utils import exportar_a_excel
@@ -27,18 +27,57 @@ class ExportacionView:
     
     def crear_vista(self):
         """Crea la vista de exportación."""
-        self.frame = ttk.Frame(self.parent, padding="10")
+        self.frame = ctk.CTkFrame(self.parent)
 
-        ttk.Label(self.frame, text="Opciones de Exportación de Resultados",
-                  style='Header.TLabel').pack(pady=(10, 20))
+        # Contenedor principal centrado
+        contenedor = ctk.CTkFrame(self.frame)
+        contenedor.pack(fill='both', expand=True, padx=30, pady=30)
 
-        export_btn_frame = ttk.Frame(self.frame)
-        export_btn_frame.pack(pady=20)
+        # Título
+        titulo_label = ctk.CTkLabel(
+            contenedor, 
+            text="Opciones de Exportación de Resultados",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color=("#1a237e", "#bbdefb")
+        )
+        titulo_label.pack(pady=(30, 24))
 
-        ttk.Button(export_btn_frame, text="Exportar a Excel", command=self.exportar_a_excel,
-                   style='TButton').pack(side='left', padx=15, ipadx=10, ipady=5)
-        ttk.Button(export_btn_frame, text="Generar Informe PDF", command=self.generar_informe_pdf,
-                   style='TButton').pack(side='left', padx=15, ipadx=10, ipady=5)
+        # Frame para botones
+        export_btn_frame = ctk.CTkFrame(contenedor)
+        export_btn_frame.pack(pady=30)
+
+        # Botón para exportar a Excel
+        excel_btn = ctk.CTkButton(
+            export_btn_frame, 
+            text="Exportar a Excel", 
+            command=self.exportar_a_excel,
+            font=ctk.CTkFont(size=14, weight="bold"),
+            height=44,
+            width=220
+        )
+        excel_btn.pack(side='left', padx=24, pady=10)
+        
+        # Botón para generar PDF
+        pdf_btn = ctk.CTkButton(
+            export_btn_frame, 
+            text="Generar Informe PDF", 
+            command=self.generar_informe_pdf,
+            font=ctk.CTkFont(size=14, weight="bold"),
+            height=44,
+            width=220
+        )
+        pdf_btn.pack(side='left', padx=24, pady=10)
+        
+        # Información adicional
+        info_label = ctk.CTkLabel(
+            contenedor,
+            text="Nota: Ejecute la predicción en la pestaña 'Configuración del Modelo' antes de exportar.",
+            font=ctk.CTkFont(size=12),
+            text_color=("#263238", "#b0bec5"),
+            wraplength=500,
+            justify="center"
+        )
+        info_label.pack(pady=30)
     
     def exportar_a_excel(self):
         """Exporta los resultados a un archivo Excel."""

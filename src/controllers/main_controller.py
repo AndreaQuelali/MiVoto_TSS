@@ -1,8 +1,8 @@
 """
 Controlador principal de la aplicación
 """
-import tkinter as tk
-from tkinter import ttk, messagebox
+import customtkinter as ctk
+from tkinter import messagebox
 from typing import Dict
 
 from models.electoral_model import ModeloPredictivoElectoral
@@ -11,7 +11,6 @@ from views.datos_view import DatosView
 from views.modelo_view import ModeloView
 from views.resultados_view import ResultadosView
 from views.exportacion_view import ExportacionView
-from utils.style_utils import configurar_estilos
 from config.settings import (WINDOW_TITLE, WINDOW_SIZE, DATOS_HISTORICOS_DEFAULT, 
                               ENCUESTAS_2025_DEFAULT, TOTAL_SENADORES, TOTAL_DIPUTADOS)
 
@@ -25,10 +24,6 @@ class MainController:
         self.root = root
         self.root.title(WINDOW_TITLE)
         self.root.geometry(WINDOW_SIZE)
-        self.root.option_add('*tearOff', False)
-        
-        # Configurar estilos
-        self.style = configurar_estilos()
         
         # Inicializar modelo
         self.modelo = ModeloPredictivoElectoral()
@@ -36,7 +31,7 @@ class MainController:
         self.modelo.cargar_encuestas(ENCUESTAS_2025_DEFAULT)
         
         # Variables de estado
-        self.notebook = None
+        self.tabview = None
         self.intro_view = None
         self.datos_view = None
         self.modelo_view = None
@@ -48,43 +43,51 @@ class MainController:
     
     def inicializar_interfaz(self):
         """Inicializa la interfaz principal de la aplicación."""
-        self.notebook = ttk.Notebook(self.root)
-        self.notebook.pack(fill='both', expand=True, padx=10, pady=10)
+        self.tabview = ctk.CTkTabview(self.root)
+        self.tabview.pack(fill='both', expand=True, padx=10, pady=10)
         
         # Crear vistas
         self.crear_vistas()
         
-        # Configurar pestañas iniciales
-        self.notebook.select(0)
-        self.notebook.tab(self.resultados_view.obtener_frame(), state='disabled')
-        self.notebook.tab(self.exportacion_view.obtener_frame(), state='disabled')
+        # Seleccionar pestaña inicial
+        self.tabview.set("Introducción")
     
     def crear_vistas(self):
         """Crea todas las vistas de la aplicación."""
-        # Vista de introducción
-        self.intro_view = IntroduccionView(self.notebook)
-        self.notebook.add(self.intro_view.obtener_frame(), text="Introducción")
-        
-        # Vista de datos
+        # Introducción
+        self.tabview.add("Introducción")
+        intro_tab = self.tabview.tab("Introducción")
+        self.intro_view = IntroduccionView(intro_tab)
+        self.intro_view.obtener_frame().pack(fill="both", expand=True)
+
+        # Datos Históricos y Encuestas
+        self.tabview.add("Datos Históricos y Encuestas")
+        datos_tab = self.tabview.tab("Datos Históricos y Encuestas")
         self.datos_view = DatosView(
-            self.notebook, 
-            self.modelo.datos_historicos, 
+            datos_tab,
+            self.modelo.datos_historicos,
             self.modelo.encuestas_2025,
             self.on_datos_actualizados
         )
-        self.notebook.add(self.datos_view.obtener_frame(), text="Datos Históricos y Encuestas")
-        
-        # Vista del modelo
-        self.modelo_view = ModeloView(self.notebook, self.ejecutar_prediccion)
-        self.notebook.add(self.modelo_view.obtener_frame(), text="Configuración del Modelo")
-        
-        # Vista de resultados
-        self.resultados_view = ResultadosView(self.notebook, self.simular_segunda_vuelta)
-        self.notebook.add(self.resultados_view.obtener_frame(), text="Resultados de Predicción")
-        
-        # Vista de exportación
-        self.exportacion_view = ExportacionView(self.notebook)
-        self.notebook.add(self.exportacion_view.obtener_frame(), text="Exportar Resultados")
+        self.datos_view.obtener_frame().pack(fill="both", expand=True)
+
+        # Configuración del Modelo
+        self.tabview.add("Configuración del Modelo")
+        modelo_tab = self.tabview.tab("Configuración del Modelo")
+        self.modelo_view = ModeloView(modelo_tab, self.ejecutar_prediccion)
+        self.modelo_view.obtener_frame().pack(fill="both", expand=True)
+
+        # Resultados de Predicción
+        self.tabview.add("Resultados de Predicción")
+        resultados_tab = self.tabview.tab("Resultados de Predicción")
+        self.resultados_view = ResultadosView(resultados_tab, self.simular_segunda_vuelta)
+        self.resultados_view.obtener_frame().pack(fill="both", expand=True)
+
+        # Exportar Resultados
+        self.tabview.add("Exportar Resultados")
+        exportar_tab = self.tabview.tab("Exportar Resultados")
+        self.exportacion_view = ExportacionView(exportar_tab)
+        self.exportacion_view.obtener_frame().pack(fill="both", expand=True)
     
     def on_datos_actualizados(self):
         """Callback cuando se actualizan los datos."""
@@ -122,12 +125,8 @@ class MainController:
             # Actualizar vistas
             self.actualizar_vistas_con_resultados(resultados)
             
-            # Habilitar pestañas de resultados
-            self.notebook.tab(self.resultados_view.obtener_frame(), state='normal')
-            self.notebook.tab(self.exportacion_view.obtener_frame(), state='normal')
-            
             # Cambiar a pestaña de resultados
-            self.notebook.select(self.resultados_view.obtener_frame())
+            self.tabview.set("Resultados de Predicción")
             
             messagebox.showinfo("Predicción Completa", 
                               "El modelo predictivo ha sido ejecutado exitosamente. ¡Consulte la pestaña de Resultados!")

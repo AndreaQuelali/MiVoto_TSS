@@ -1,11 +1,10 @@
 """
 Vista para la gestión de datos históricos y encuestas
 """
-import tkinter as tk
-from tkinter import ttk, filedialog, messagebox
+import customtkinter as ctk
+from tkinter import filedialog, messagebox
 from typing import Dict, Callable
 
-from utils.style_utils import crear_scrollable_frame
 from utils.chart_utils import crear_grafico_historicos, crear_grafico_encuestas
 from utils.file_utils import cargar_encuestas_desde_archivo, cargar_historicos_desde_archivo
 from config.settings import EXCEL_CSV_FILE_TYPES
@@ -34,30 +33,68 @@ class DatosView:
     
     def crear_vista(self):
         """Crea la vista de datos."""
-        self.frame = ttk.Frame(self.parent, padding="10")
+        self.frame = ctk.CTkFrame(self.parent)
         
-        # Crear frame con scrollbar
-        canvas, scrollbar, scrollable_frame = crear_scrollable_frame(self.frame)
+        # Contenedor principal centrado
+        contenedor = ctk.CTkFrame(self.frame)
+        contenedor.pack(fill='both', expand=True, padx=30, pady=30)
         
-        ttk.Label(scrollable_frame, text="Gestión de Datos para el Modelo Predictivo 2025",
-                  style='Header.TLabel').pack(pady=(10, 20))
+        # Título
+        titulo_label = ctk.CTkLabel(
+            contenedor, 
+            text="Gestión de Datos para el Modelo Predictivo 2025",
+            font=ctk.CTkFont(size=18, weight="bold"),
+            text_color=("#1a237e", "#bbdefb")
+        )
+        titulo_label.pack(pady=(10, 24))
+
+        # Scrollable frame para el contenido de datos
+        self.scrollable_frame = ctk.CTkScrollableFrame(contenedor, width=800, height=500)
+        self.scrollable_frame.pack(fill='both', expand=True, padx=0, pady=0)
 
         # Sección de datos históricos
-        self.frame_historicos = ttk.LabelFrame(scrollable_frame, text="Resultados Históricos de Elecciones en Bolivia")
-        self.frame_historicos.pack(fill='x', padx=10, pady=5, ipadx=5, ipady=5)
+        self.frame_historicos = ctk.CTkFrame(self.scrollable_frame)
+        self.frame_historicos.pack(fill='x', padx=10, pady=10)
+        historicos_label = ctk.CTkLabel(
+            self.frame_historicos,
+            text="Resultados Históricos de Elecciones en Bolivia",
+            font=ctk.CTkFont(size=15, weight="bold"),
+            text_color=("#1565c0", "#90caf9")
+        )
+        historicos_label.pack(pady=(12, 8))
 
         # Sección de encuestas 2025
-        self.frame_encuestas = ttk.LabelFrame(scrollable_frame, text="Encuestas de Intención de Voto 2025")
-        self.frame_encuestas.pack(fill='x', padx=10, pady=5, ipadx=5, ipady=5)
+        self.frame_encuestas = ctk.CTkFrame(self.scrollable_frame)
+        self.frame_encuestas.pack(fill='x', padx=10, pady=10)
+        encuestas_label = ctk.CTkLabel(
+            self.frame_encuestas,
+            text="Encuestas de Intención de Voto 2025",
+            font=ctk.CTkFont(size=15, weight="bold"),
+            text_color=("#1565c0", "#90caf9")
+        )
+        encuestas_label.pack(pady=(12, 8))
 
         # Botones para cargar nuevos datos
-        btn_frame = ttk.Frame(scrollable_frame)
-        btn_frame.pack(pady=20)
-        ttk.Button(btn_frame, text="Cargar Nuevas Encuestas (CSV/Excel)",
-                   command=self.cargar_encuestas).pack(side='left', padx=10)
-        ttk.Button(btn_frame, text="Cargar Datos Históricos (CSV/Excel)",
-                   command=self.cargar_historicos).pack(side='left', padx=10)
-
+        btn_frame = ctk.CTkFrame(self.scrollable_frame)
+        btn_frame.pack(pady=30)
+        cargar_encuestas_btn = ctk.CTkButton(
+            btn_frame, 
+            text="Cargar Nuevas Encuestas (CSV/Excel)",
+            command=self.cargar_encuestas,
+            font=ctk.CTkFont(size=13, weight="bold"),
+            width=220,
+            height=38
+        )
+        cargar_encuestas_btn.pack(side='left', padx=18)
+        cargar_historicos_btn = ctk.CTkButton(
+            btn_frame, 
+            text="Cargar Datos Históricos (CSV/Excel)",
+            command=self.cargar_historicos,
+            font=ctk.CTkFont(size=13, weight="bold"),
+            width=220,
+            height=38
+        )
+        cargar_historicos_btn.pack(side='left', padx=18)
         self.actualizar_tablas_datos()
     
     def actualizar_tablas_datos(self):
@@ -87,28 +124,40 @@ class DatosView:
     def _crear_tabla_historicos(self):
         """Crea la tabla para mostrar los datos históricos."""
         if not self.datos_historicos:
-            ttk.Label(self.frame_historicos, text="No hay datos históricos cargados.").pack(pady=5)
+            no_data_label = ctk.CTkLabel(
+                self.frame_historicos, 
+                text="No hay datos históricos cargados.",
+                text_color=("gray50", "gray50")
+            )
+            no_data_label.pack(pady=5)
             return
 
         # Obtener todos los partidos únicos para las columnas
         all_parties = sorted(list(set(p for data in self.datos_historicos.values() for p in data.keys())))
         columns = ['Año'] + all_parties
 
-        self.tree_historicos = ttk.Treeview(self.frame_historicos, columns=columns, show='headings', height=7)
+        # Crear tabla usando CTkTextbox para simular una tabla
+        self.tree_historicos = ctk.CTkTextbox(self.frame_historicos, height=200, fg_color="#f5f5f5")
         self.tree_historicos.pack(fill='both', expand=True, padx=10, pady=5)
+        self.tree_historicos.configure(font=("Consolas", 13, "bold"))
 
-        for col in columns:
-            self.tree_historicos.heading(col, text=col)
-            self.tree_historicos.column(col, width=80 if col == 'Año' else 100, anchor='center')
+        # Crear encabezados
+        header = "Año".ljust(8)
+        for party in all_parties:
+            header += f"{party}".ljust(12)
+        self.tree_historicos.insert("1.0", header + "\n")
+        self.tree_historicos.insert("end", "=" * len(header) + "\n")
 
-        for year, data in sorted(self.datos_historicos.items()):
-            values = [year] + [f"{data.get(party, 0):.1f}%" for party in all_parties]
-            self.tree_historicos.insert('', 'end', values=values)
+        # Insertar datos
+        for idx, (year, data) in enumerate(sorted(self.datos_historicos.items())):
+            row = f"{year}".ljust(8)
+            for party in all_parties:
+                row += f"{data.get(party, 0):.1f}%".ljust(12)
+            self.tree_historicos.insert("end", row + "\n")
+            if idx == 0:
+                self.tree_historicos.insert("end", "-" * len(header) + "\n")
 
-        # Scrollbar para la tabla
-        vsb = ttk.Scrollbar(self.frame_historicos, orient="vertical", command=self.tree_historicos.yview)
-        vsb.pack(side='right', fill='y')
-        self.tree_historicos.configure(yscrollcommand=vsb.set)
+        self.tree_historicos.configure(state="disabled")
     
     def _crear_grafico_historicos(self):
         """Crea el gráfico de líneas para la evolución histórica de votos."""
@@ -117,28 +166,40 @@ class DatosView:
     def _crear_tabla_encuestas(self):
         """Crea la tabla para mostrar los datos de las encuestas 2025."""
         if not self.encuestas_2025:
-            ttk.Label(self.frame_encuestas, text="No hay datos de encuestas cargados.").pack(pady=5)
+            no_data_label = ctk.CTkLabel(
+                self.frame_encuestas, 
+                text="No hay datos de encuestas cargados.",
+                text_color=("gray50", "gray50")
+            )
+            no_data_label.pack(pady=5)
             return
 
         # Obtener todos los partidos únicos de las encuestas
         all_parties = sorted(list(set(p for data in self.encuestas_2025.values() for p in data.keys())))
         columns = ['Encuesta'] + all_parties
 
-        self.tree_encuestas = ttk.Treeview(self.frame_encuestas, columns=columns, show='headings', height=5)
+        # Crear tabla usando CTkTextbox para simular una tabla
+        self.tree_encuestas = ctk.CTkTextbox(self.frame_encuestas, height=150, fg_color="#f5f5f5")
         self.tree_encuestas.pack(fill='both', expand=True, padx=10, pady=5)
+        self.tree_encuestas.configure(font=("Consolas", 13, "bold"))
 
-        for col in columns:
-            self.tree_encuestas.heading(col, text=col)
-            self.tree_encuestas.column(col, width=100, anchor='center')
+        # Crear encabezados
+        header = "Encuesta".ljust(15)
+        for party in all_parties:
+            header += f"{party}".ljust(12)
+        self.tree_encuestas.insert("1.0", header + "\n")
+        self.tree_encuestas.insert("end", "=" * len(header) + "\n")
 
-        for survey_name, data in self.encuestas_2025.items():
-            values = [survey_name] + [f"{data.get(party, 0):.1f}%" for party in all_parties]
-            self.tree_encuestas.insert('', 'end', values=values)
+        # Insertar datos
+        for idx, (survey_name, data) in enumerate(self.encuestas_2025.items()):
+            row = f"{survey_name}".ljust(15)
+            for party in all_parties:
+                row += f"{data.get(party, 0):.1f}%".ljust(12)
+            self.tree_encuestas.insert("end", row + "\n")
+            if idx == 0:
+                self.tree_encuestas.insert("end", "-" * len(header) + "\n")
 
-        # Scrollbar para la tabla
-        vsb = ttk.Scrollbar(self.frame_encuestas, orient="vertical", command=self.tree_encuestas.yview)
-        vsb.pack(side='right', fill='y')
-        self.tree_encuestas.configure(yscrollcommand=vsb.set)
+        self.tree_encuestas.configure(state="disabled")
     
     def _crear_grafico_encuestas(self):
         """Crea el gráfico de barras para el promedio de las encuestas 2025."""
