@@ -9,6 +9,10 @@ from utils.chart_utils import crear_grafico_historicos, crear_grafico_encuestas
 from utils.file_utils import cargar_encuestas_desde_archivo, cargar_historicos_desde_archivo
 from utils.logo_utils import logo_manager
 from config.settings import EXCEL_CSV_FILE_TYPES
+from config.bolivian_theme import (
+    BOLIVIA_RED, BOLIVIA_GREEN, BOLIVIA_YELLOW, BOLIVIA_BG_WARM,
+    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD
+)
 
 
 class DatosView:
@@ -34,10 +38,10 @@ class DatosView:
     
     def crear_vista(self):
         """Crea la vista de datos."""
-        self.frame = ctk.CTkFrame(self.parent)
+        self.frame = ctk.CTkFrame(self.parent, fg_color=BOLIVIA_BG_WARM)
         
         # Contenedor principal centrado
-        contenedor = ctk.CTkFrame(self.frame)
+        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_WARM)
         contenedor.pack(fill='both', expand=True, padx=30, pady=30)
         
         # Logo del sistema encima del título, sin borde
@@ -49,38 +53,38 @@ class DatosView:
             contenedor, 
             text="Gestión de Datos para el Modelo Predictivo 2025",
             font=ctk.CTkFont(size=18, weight="bold"),
-            text_color=("#1a237e", "#bbdefb")
+            text_color=(BOLIVIA_RED, BOLIVIA_RED)
         )
         titulo_label.pack(pady=(0, 24))
 
         # Scrollable frame para el contenido de datos
-        self.scrollable_frame = ctk.CTkScrollableFrame(contenedor, width=800, height=500)
+        self.scrollable_frame = ctk.CTkScrollableFrame(contenedor, width=800, height=500, fg_color=BOLIVIA_BG_WARM)
         self.scrollable_frame.pack(fill='both', expand=True, padx=0, pady=0)
 
         # Sección de datos históricos
-        self.frame_historicos = ctk.CTkFrame(self.scrollable_frame)
+        self.frame_historicos = ctk.CTkFrame(self.scrollable_frame, fg_color=BOLIVIA_BG_WARM)
         self.frame_historicos.pack(fill='x', padx=10, pady=10)
         historicos_label = ctk.CTkLabel(
             self.frame_historicos,
             text="Resultados Históricos de Elecciones en Bolivia",
             font=ctk.CTkFont(size=15, weight="bold"),
-            text_color=("#1565c0", "#90caf9")
+            text_color=(BOLIVIA_DARK_GREEN, BOLIVIA_DARK_GREEN)
         )
         historicos_label.pack(pady=(12, 8))
 
         # Sección de encuestas 2025
-        self.frame_encuestas = ctk.CTkFrame(self.scrollable_frame)
+        self.frame_encuestas = ctk.CTkFrame(self.scrollable_frame, fg_color=BOLIVIA_BG_WARM)
         self.frame_encuestas.pack(fill='x', padx=10, pady=10)
         encuestas_label = ctk.CTkLabel(
             self.frame_encuestas,
             text="Encuestas de Intención de Voto 2025",
             font=ctk.CTkFont(size=15, weight="bold"),
-            text_color=("#1565c0", "#90caf9")
+            text_color=(BOLIVIA_DARK_GREEN, BOLIVIA_DARK_GREEN)
         )
         encuestas_label.pack(pady=(12, 8))
 
         # Botones para cargar nuevos datos
-        btn_frame = ctk.CTkFrame(self.scrollable_frame)
+        btn_frame = ctk.CTkFrame(self.scrollable_frame, fg_color=BOLIVIA_BG_WARM)
         btn_frame.pack(pady=30)
         cargar_encuestas_btn = ctk.CTkButton(
             btn_frame, 
@@ -88,7 +92,9 @@ class DatosView:
             command=self.cargar_encuestas,
             font=ctk.CTkFont(size=13, weight="bold"),
             width=220,
-            height=38
+            height=38,
+            fg_color=BOLIVIA_GREEN,
+            hover_color=BOLIVIA_DARK_GREEN
         )
         cargar_encuestas_btn.pack(side='left', padx=18)
         cargar_historicos_btn = ctk.CTkButton(
@@ -97,7 +103,9 @@ class DatosView:
             command=self.cargar_historicos,
             font=ctk.CTkFont(size=13, weight="bold"),
             width=220,
-            height=38
+            height=38,
+            fg_color=BOLIVIA_GREEN,
+            hover_color=BOLIVIA_DARK_GREEN
         )
         cargar_historicos_btn.pack(side='left', padx=18)
         self.actualizar_tablas_datos()

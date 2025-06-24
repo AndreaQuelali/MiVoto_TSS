@@ -9,6 +9,10 @@ from utils.file_utils import exportar_a_excel
 from utils.pdf_utils import generar_informe_pdf
 from utils.logo_utils import logo_manager
 from config.settings import EXCEL_FILE_TYPES, PDF_FILE_TYPES
+from config.bolivian_theme import (
+    BOLIVIA_RED, BOLIVIA_GREEN, BOLIVIA_YELLOW, BOLIVIA_BG_WARM,
+    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD
+)
 
 
 class ExportacionView:
@@ -28,10 +32,10 @@ class ExportacionView:
     
     def crear_vista(self):
         """Crea la vista de exportación."""
-        self.frame = ctk.CTkFrame(self.parent)
+        self.frame = ctk.CTkFrame(self.parent, fg_color=BOLIVIA_BG_WARM)
 
         # Contenedor principal centrado
-        contenedor = ctk.CTkFrame(self.frame)
+        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_WARM)
         contenedor.pack(fill='both', expand=True, padx=30, pady=30)
 
         # Logo del sistema encima del título, sin borde
@@ -43,12 +47,12 @@ class ExportacionView:
             contenedor, 
             text="Opciones de Exportación de Resultados",
             font=ctk.CTkFont(size=18, weight="bold"),
-            text_color=("#1a237e", "#bbdefb")
+            text_color=(BOLIVIA_RED, BOLIVIA_RED)
         )
         titulo_label.pack(pady=(0, 24))
 
         # Frame para botones
-        export_btn_frame = ctk.CTkFrame(contenedor)
+        export_btn_frame = ctk.CTkFrame(contenedor, fg_color=BOLIVIA_BG_WARM)
         export_btn_frame.pack(pady=30)
 
         # Botón para exportar a Excel
@@ -58,7 +62,9 @@ class ExportacionView:
             command=self.exportar_a_excel,
             font=ctk.CTkFont(size=14, weight="bold"),
             height=44,
-            width=220
+            width=220,
+            fg_color=BOLIVIA_GREEN,
+            hover_color=BOLIVIA_DARK_GREEN
         )
         excel_btn.pack(side='left', padx=24, pady=10)
         
@@ -69,7 +75,9 @@ class ExportacionView:
             command=self.generar_informe_pdf,
             font=ctk.CTkFont(size=14, weight="bold"),
             height=44,
-            width=220
+            width=220,
+            fg_color=BOLIVIA_GREEN,
+            hover_color=BOLIVIA_DARK_GREEN
         )
         pdf_btn.pack(side='left', padx=24, pady=10)
         
@@ -78,7 +86,7 @@ class ExportacionView:
             contenedor,
             text="Nota: Ejecute la predicción en la pestaña 'Configuración del Modelo' antes de exportar.",
             font=ctk.CTkFont(size=12),
-            text_color=("#263238", "#b0bec5"),
+            text_color=(BOLIVIA_TEXT_DARK, BOLIVIA_TEXT_DARK),
             wraplength=500,
             justify="center"
         )

@@ -3,6 +3,10 @@ Vista de introducción de la aplicación
 """
 import customtkinter as ctk
 from utils.logo_utils import logo_manager
+from config.bolivian_theme import (
+    BOLIVIA_RED, BOLIVIA_GREEN, BOLIVIA_YELLOW, BOLIVIA_BG_WARM,
+    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD
+)
 
 
 class IntroduccionView:
@@ -17,10 +21,10 @@ class IntroduccionView:
     
     def crear_vista(self):
         """Crea la vista de introducción."""
-        self.frame = ctk.CTkFrame(self.parent)
+        self.frame = ctk.CTkFrame(self.parent, fg_color=BOLIVIA_BG_WARM)
 
         # Contenedor central
-        contenedor = ctk.CTkFrame(self.frame)
+        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_WARM)
         contenedor.pack(expand=True, fill="both", padx=40, pady=40)
 
         # Logo del sistema encima del título, sin borde
@@ -32,7 +36,7 @@ class IntroduccionView:
             contenedor, 
             text="MODELO MATEMÁTICO PARA LAS ELECCIONES GENERALES EN BOLIVIA 2025",
             font=ctk.CTkFont(size=22, weight="bold"),
-            text_color=("#1a237e", "#bbdefb"),
+            text_color=(BOLIVIA_RED, BOLIVIA_RED),
             wraplength=700,
             justify="center"
         )
@@ -43,7 +47,7 @@ class IntroduccionView:
             contenedor, 
             text="Taller de Simulación de Sistemas",
             font=ctk.CTkFont(size=16, weight="bold"),
-            text_color=("#1565c0", "#90caf9")
+            text_color=(BOLIVIA_DARK_GREEN, BOLIVIA_DARK_GREEN)
         )
         subtitulo_label.pack(pady=8)
         
@@ -52,7 +56,7 @@ class IntroduccionView:
             contenedor, 
             text="UNIVERSIDAD MAYOR DE SAN SIMON",
             font=ctk.CTkFont(size=13, slant="italic"),
-            text_color=("#263238", "#b0bec5")
+            text_color=(BOLIVIA_TEXT_DARK, BOLIVIA_TEXT_DARK)
         )
         universidad_label.pack(pady=(0, 28))
 
@@ -73,7 +77,7 @@ class IntroduccionView:
             contenedor, 
             text=intro_text,
             font=ctk.CTkFont(size=12),
-            text_color=("gray10", "gray90"),
+            text_color=(BOLIVIA_TEXT_DARK, BOLIVIA_TEXT_DARK),
             wraplength=700,
             justify="left"
         )

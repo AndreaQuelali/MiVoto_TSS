@@ -8,6 +8,10 @@ from typing import Dict, Callable
 from utils.chart_utils import crear_grafico_votos, crear_grafico_escanos
 from utils.logo_utils import logo_manager
 from config.settings import TOTAL_SENADORES, TOTAL_DIPUTADOS
+from config.bolivian_theme import (
+    BOLIVIA_RED, BOLIVIA_GREEN, BOLIVIA_YELLOW, BOLIVIA_BG_WARM,
+    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD
+)
 
 
 class ResultadosView:
@@ -41,10 +45,10 @@ class ResultadosView:
     
     def crear_vista(self):
         """Crea la vista de resultados."""
-        self.frame = ctk.CTkFrame(self.parent)
+        self.frame = ctk.CTkFrame(self.parent, fg_color=BOLIVIA_BG_WARM)
         
         # Contenedor principal centrado
-        contenedor = ctk.CTkFrame(self.frame)
+        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_WARM)
         contenedor.pack(fill='both', expand=True, padx=30, pady=30)
         
         # Logo del sistema encima del título, sin borde
@@ -56,44 +60,44 @@ class ResultadosView:
             contenedor, 
             text="Resultados de la Predicción Electoral 2025",
             font=ctk.CTkFont(size=18, weight="bold"),
-            text_color=("#1a237e", "#bbdefb")
+            text_color=(BOLIVIA_RED, BOLIVIA_RED)
         )
         titulo_label.pack(pady=(0, 24))
 
         # Scrollable frame para el contenido de resultados
-        self.scrollable_frame = ctk.CTkScrollableFrame(contenedor, width=800, height=500)
+        self.scrollable_frame = ctk.CTkScrollableFrame(contenedor, width=800, height=500, fg_color=BOLIVIA_BG_WARM)
         self.scrollable_frame.pack(fill='both', expand=True, padx=0, pady=0)
 
         # Sección de resultados de votos
-        self.frame_votos = ctk.CTkFrame(self.scrollable_frame)
+        self.frame_votos = ctk.CTkFrame(self.scrollable_frame, fg_color=BOLIVIA_BG_WARM)
         self.frame_votos.pack(fill='x', padx=10, pady=12)
         votos_label = ctk.CTkLabel(
             self.frame_votos,
             text="Predicción de Votos 2025",
             font=ctk.CTkFont(size=15, weight="bold"),
-            text_color=("#1565c0", "#90caf9")
+            text_color=(BOLIVIA_DARK_GREEN, BOLIVIA_DARK_GREEN)
         )
         votos_label.pack(pady=(12, 8))
 
         # Sección de resultados de escaños (Senadores)
-        self.frame_senadores = ctk.CTkFrame(self.scrollable_frame)
+        self.frame_senadores = ctk.CTkFrame(self.scrollable_frame, fg_color=BOLIVIA_BG_WARM)
         self.frame_senadores.pack(fill='x', padx=10, pady=12)
         senadores_label = ctk.CTkLabel(
             self.frame_senadores,
             text=f"Distribución de Senadores (Total: {TOTAL_SENADORES})",
             font=ctk.CTkFont(size=15, weight="bold"),
-            text_color=("#1565c0", "#90caf9")
+            text_color=(BOLIVIA_DARK_GREEN, BOLIVIA_DARK_GREEN)
         )
         senadores_label.pack(pady=(12, 8))
 
         # Sección de resultados de escaños (Diputados)
-        self.frame_diputados = ctk.CTkFrame(self.scrollable_frame)
+        self.frame_diputados = ctk.CTkFrame(self.scrollable_frame, fg_color=BOLIVIA_BG_WARM)
         self.frame_diputados.pack(fill='x', padx=10, pady=12)
         diputados_label = ctk.CTkLabel(
             self.frame_diputados,
             text=f"Distribución de Diputados (Total: {TOTAL_DIPUTADOS})",
             font=ctk.CTkFont(size=15, weight="bold"),
-            text_color=("#1565c0", "#90caf9")
+            text_color=(BOLIVIA_DARK_GREEN, BOLIVIA_DARK_GREEN)
         )
         diputados_label.pack(pady=(12, 8))
 
@@ -105,7 +109,9 @@ class ResultadosView:
             state='disabled',
             font=ctk.CTkFont(size=13, weight="bold"),
             width=260,
-            height=38
+            height=38,
+            fg_color=BOLIVIA_GREEN,
+            hover_color=BOLIVIA_DARK_GREEN
         )
         self.btn_segunda_vuelta.pack(pady=18)
 
@@ -116,7 +122,9 @@ class ResultadosView:
             command=self.mostrar_resultados,
             font=ctk.CTkFont(size=13, weight="bold"),
             width=260,
-            height=38
+            height=38,
+            fg_color=BOLIVIA_GREEN,
+            hover_color=BOLIVIA_DARK_GREEN
         )
         actualizar_btn.pack(pady=10)
     

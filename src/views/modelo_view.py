@@ -9,6 +9,10 @@ from config.settings import (PESO_HISTORICO_DEFAULT, PESO_ENCUESTAS_DEFAULT,
                               MARGEN_ERROR_PREDICCION_DEFAULT, TENDENCIA_AJUSTE_DEFAULT, 
                               UMBRAL_MINIMO_DEFAULT)
 from utils.logo_utils import logo_manager
+from config.bolivian_theme import (
+    BOLIVIA_RED, BOLIVIA_GREEN, BOLIVIA_YELLOW, BOLIVIA_BG_WARM,
+    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD
+)
 
 
 class ModeloView:
@@ -41,10 +45,10 @@ class ModeloView:
     
     def crear_vista(self):
         """Crea la vista del modelo."""
-        self.frame = ctk.CTkFrame(self.parent)
+        self.frame = ctk.CTkFrame(self.parent, fg_color=BOLIVIA_BG_WARM)
         
         # Contenedor principal centrado
-        contenedor = ctk.CTkFrame(self.frame)
+        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_WARM)
         contenedor.pack(fill='both', expand=True, padx=30, pady=30)
         
         # Logo del sistema encima del título, sin borde
@@ -56,60 +60,60 @@ class ModeloView:
             contenedor, 
             text="Ajuste de Parámetros del Modelo Predictivo",
             font=ctk.CTkFont(size=18, weight="bold"),
-            text_color=("#1a237e", "#bbdefb")
+            text_color=(BOLIVIA_RED, BOLIVIA_RED)
         )
         titulo_label.pack(pady=(0, 24))
 
         # Frame de ponderación
-        frame_ponderacion = ctk.CTkFrame(contenedor)
+        frame_ponderacion = ctk.CTkFrame(contenedor, fg_color=BOLIVIA_BG_WARM)
         frame_ponderacion.pack(fill='x', padx=10, pady=12)
         ponderacion_label = ctk.CTkLabel(
             frame_ponderacion,
             text="Ponderación de Datos de Entrada",
             font=ctk.CTkFont(size=15, weight="bold"),
-            text_color=("#1565c0", "#90caf9")
+            text_color=(BOLIVIA_DARK_GREEN, BOLIVIA_DARK_GREEN)
         )
         ponderacion_label.grid(row=0, column=0, columnspan=3, pady=(12, 10))
 
         # Peso de datos históricos
-        ctk.CTkLabel(frame_ponderacion, text="Peso de datos históricos (%):", font=ctk.CTkFont(size=12)).grid(row=1, column=0, sticky="w", padx=10, pady=6)
-        self.peso_hist_scale = ctk.CTkSlider(frame_ponderacion, from_=0, to=100, variable=self.peso_hist_var, command=self._update_pesos)
+        ctk.CTkLabel(frame_ponderacion, text="Peso de datos históricos (%):", font=ctk.CTkFont(size=12), text_color=(BOLIVIA_TEXT_DARK, BOLIVIA_TEXT_DARK)).grid(row=1, column=0, sticky="w", padx=10, pady=6)
+        self.peso_hist_scale = ctk.CTkSlider(frame_ponderacion, from_=0, to=100, variable=self.peso_hist_var, command=self._update_pesos, progress_color=BOLIVIA_GREEN, button_color=BOLIVIA_DARK_GREEN)
         self.peso_hist_scale.grid(row=1, column=1, sticky="ew", padx=10, pady=6)
-        self.peso_hist_label = ctk.CTkLabel(frame_ponderacion, textvariable=self.peso_hist_var, font=ctk.CTkFont(size=12))
+        self.peso_hist_label = ctk.CTkLabel(frame_ponderacion, textvariable=self.peso_hist_var, font=ctk.CTkFont(size=12), text_color=(BOLIVIA_TEXT_DARK, BOLIVIA_TEXT_DARK))
         self.peso_hist_label.grid(row=1, column=2, sticky="e", padx=10, pady=6)
 
         # Peso de encuestas
-        ctk.CTkLabel(frame_ponderacion, text="Peso de encuestas 2025 (%):", font=ctk.CTkFont(size=12)).grid(row=2, column=0, sticky="w", padx=10, pady=6)
-        self.peso_enc_scale = ctk.CTkSlider(frame_ponderacion, from_=0, to=100, variable=self.peso_enc_var, command=self._update_pesos)
+        ctk.CTkLabel(frame_ponderacion, text="Peso de encuestas 2025 (%):", font=ctk.CTkFont(size=12), text_color=(BOLIVIA_TEXT_DARK, BOLIVIA_TEXT_DARK)).grid(row=2, column=0, sticky="w", padx=10, pady=6)
+        self.peso_enc_scale = ctk.CTkSlider(frame_ponderacion, from_=0, to=100, variable=self.peso_enc_var, command=self._update_pesos, progress_color=BOLIVIA_GREEN, button_color=BOLIVIA_DARK_GREEN)
         self.peso_enc_scale.grid(row=2, column=1, sticky="ew", padx=10, pady=6)
-        self.peso_enc_label = ctk.CTkLabel(frame_ponderacion, textvariable=self.peso_enc_var, font=ctk.CTkFont(size=12))
+        self.peso_enc_label = ctk.CTkLabel(frame_ponderacion, textvariable=self.peso_enc_var, font=ctk.CTkFont(size=12), text_color=(BOLIVIA_TEXT_DARK, BOLIVIA_TEXT_DARK))
         self.peso_enc_label.grid(row=2, column=2, sticky="e", padx=10, pady=6)
         frame_ponderacion.grid_columnconfigure(1, weight=1)
 
         # Frame de ajuste fino
-        frame_ajuste = ctk.CTkFrame(contenedor)
+        frame_ajuste = ctk.CTkFrame(contenedor, fg_color=BOLIVIA_BG_WARM)
         frame_ajuste.pack(fill='x', padx=10, pady=12)
         ajuste_label = ctk.CTkLabel(
             frame_ajuste,
             text="Variables de Ajuste Fino",
             font=ctk.CTkFont(size=15, weight="bold"),
-            text_color=("#1565c0", "#90caf9")
+            text_color=(BOLIVIA_DARK_GREEN, BOLIVIA_DARK_GREEN)
         )
         ajuste_label.grid(row=0, column=0, columnspan=2, pady=(12, 10))
 
         # Margen de error
-        ctk.CTkLabel(frame_ajuste, text="Margen de error de predicción (%):", font=ctk.CTkFont(size=12)).grid(row=1, column=0, sticky="w", padx=10, pady=6)
-        self.margen_error_entry = ctk.CTkEntry(frame_ajuste, textvariable=self.margen_error_var, width=100, font=ctk.CTkFont(size=12))
+        ctk.CTkLabel(frame_ajuste, text="Margen de error de predicción (%):", font=ctk.CTkFont(size=12), text_color=(BOLIVIA_TEXT_DARK, BOLIVIA_TEXT_DARK)).grid(row=1, column=0, sticky="w", padx=10, pady=6)
+        self.margen_error_entry = ctk.CTkEntry(frame_ajuste, textvariable=self.margen_error_var, width=100, font=ctk.CTkFont(size=12), fg_color="white", text_color=BOLIVIA_TEXT_DARK)
         self.margen_error_entry.grid(row=1, column=1, sticky="w", padx=10, pady=6)
 
         # Tendencia histórica
-        ctk.CTkLabel(frame_ajuste, text="Tendencia histórica:", font=ctk.CTkFont(size=12)).grid(row=2, column=0, sticky="w", padx=10, pady=6)
-        self.tendencia_combobox = ctk.CTkOptionMenu(frame_ajuste, values=["Conservar", "Suavizar", "Acentuar"], variable=self.tendencia_var, font=ctk.CTkFont(size=12))
+        ctk.CTkLabel(frame_ajuste, text="Tendencia histórica:", font=ctk.CTkFont(size=12), text_color=(BOLIVIA_TEXT_DARK, BOLIVIA_TEXT_DARK)).grid(row=2, column=0, sticky="w", padx=10, pady=6)
+        self.tendencia_combobox = ctk.CTkOptionMenu(frame_ajuste, values=["Conservar", "Suavizar", "Acentuar"], variable=self.tendencia_var, font=ctk.CTkFont(size=12), fg_color=BOLIVIA_GREEN, button_color=BOLIVIA_DARK_GREEN)
         self.tendencia_combobox.grid(row=2, column=1, sticky="w", padx=10, pady=6)
 
         # Umbral mínimo
-        ctk.CTkLabel(frame_ajuste, text="Umbral mínimo de votos para escaños (%):", font=ctk.CTkFont(size=12)).grid(row=3, column=0, sticky="w", padx=10, pady=6)
-        self.umbral_minimo_entry = ctk.CTkEntry(frame_ajuste, textvariable=self.umbral_minimo_var, width=100, font=ctk.CTkFont(size=12))
+        ctk.CTkLabel(frame_ajuste, text="Umbral mínimo de votos para escaños (%):", font=ctk.CTkFont(size=12), text_color=(BOLIVIA_TEXT_DARK, BOLIVIA_TEXT_DARK)).grid(row=3, column=0, sticky="w", padx=10, pady=6)
+        self.umbral_minimo_entry = ctk.CTkEntry(frame_ajuste, textvariable=self.umbral_minimo_var, width=100, font=ctk.CTkFont(size=12), fg_color="white", text_color=BOLIVIA_TEXT_DARK)
         self.umbral_minimo_entry.grid(row=3, column=1, sticky="w", padx=10, pady=6)
         frame_ajuste.grid_columnconfigure(1, weight=1)
 
@@ -120,7 +124,9 @@ class ModeloView:
             command=self.ejecutar_prediccion,
             font=ctk.CTkFont(size=15, weight="bold"),
             height=44,
-            width=340
+            width=340,
+            fg_color=BOLIVIA_RED,
+            hover_color=BOLIVIA_DARK_GREEN
         )
         ejecutar_btn.pack(pady=36)
     

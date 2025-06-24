@@ -13,6 +13,10 @@ from views.resultados_view import ResultadosView
 from views.exportacion_view import ExportacionView
 from config.settings import (WINDOW_TITLE, WINDOW_SIZE, DATOS_HISTORICOS_DEFAULT, 
                               ENCUESTAS_2025_DEFAULT, TOTAL_SENADORES, TOTAL_DIPUTADOS)
+from config.bolivian_theme import (
+    BOLIVIA_RED, BOLIVIA_GREEN, BOLIVIA_YELLOW, BOLIVIA_BG_WARM,
+    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD
+)
 
 
 class MainController:
@@ -24,6 +28,9 @@ class MainController:
         self.root = root
         self.root.title(WINDOW_TITLE)
         self.root.geometry(WINDOW_SIZE)
+        
+        # Configurar color de fondo de la ventana principal
+        self.root.configure(fg_color=BOLIVIA_BG_WARM)
         
         # Inicializar modelo
         self.modelo = ModeloPredictivoElectoral()
