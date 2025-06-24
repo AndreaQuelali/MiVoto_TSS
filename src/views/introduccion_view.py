@@ -2,6 +2,7 @@
 Vista de introducción de la aplicación
 """
 import customtkinter as ctk
+from utils.logo_utils import logo_manager
 
 
 class IntroduccionView:
@@ -22,7 +23,11 @@ class IntroduccionView:
         contenedor = ctk.CTkFrame(self.frame)
         contenedor.pack(expand=True, fill="both", padx=40, pady=40)
 
-        # Título principal
+        # Logo del sistema encima del título, sin borde
+        logo_label = logo_manager.obtener_logo_widget(contenedor, size=(120, 120))
+        logo_label.pack(pady=(0, 20))
+        
+        # Título principal debajo del logo, centrado
         titulo_label = ctk.CTkLabel(
             contenedor, 
             text="MODELO MATEMÁTICO PARA LAS ELECCIONES GENERALES EN BOLIVIA 2025",
@@ -31,7 +36,7 @@ class IntroduccionView:
             wraplength=700,
             justify="center"
         )
-        titulo_label.pack(pady=(30, 18))
+        titulo_label.pack(pady=(0, 18))
         
         # Subtítulo
         subtitulo_label = ctk.CTkLabel(

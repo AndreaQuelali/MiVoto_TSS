@@ -6,6 +6,7 @@ from tkinter import messagebox
 from typing import Dict, Callable
 
 from utils.chart_utils import crear_grafico_votos, crear_grafico_escanos
+from utils.logo_utils import logo_manager
 from config.settings import TOTAL_SENADORES, TOTAL_DIPUTADOS
 
 
@@ -46,14 +47,18 @@ class ResultadosView:
         contenedor = ctk.CTkFrame(self.frame)
         contenedor.pack(fill='both', expand=True, padx=30, pady=30)
         
-        # Título
+        # Logo del sistema encima del título, sin borde
+        logo_label = logo_manager.obtener_logo_widget(contenedor, size=(100, 100))
+        logo_label.pack(pady=(0, 15))
+        
+        # Título debajo del logo, centrado
         titulo_label = ctk.CTkLabel(
             contenedor, 
             text="Resultados de la Predicción Electoral 2025",
             font=ctk.CTkFont(size=18, weight="bold"),
             text_color=("#1a237e", "#bbdefb")
         )
-        titulo_label.pack(pady=(10, 24))
+        titulo_label.pack(pady=(0, 24))
 
         # Scrollable frame para el contenido de resultados
         self.scrollable_frame = ctk.CTkScrollableFrame(contenedor, width=800, height=500)

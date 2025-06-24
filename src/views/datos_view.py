@@ -7,6 +7,7 @@ from typing import Dict, Callable
 
 from utils.chart_utils import crear_grafico_historicos, crear_grafico_encuestas
 from utils.file_utils import cargar_encuestas_desde_archivo, cargar_historicos_desde_archivo
+from utils.logo_utils import logo_manager
 from config.settings import EXCEL_CSV_FILE_TYPES
 
 
@@ -39,14 +40,18 @@ class DatosView:
         contenedor = ctk.CTkFrame(self.frame)
         contenedor.pack(fill='both', expand=True, padx=30, pady=30)
         
-        # Título
+        # Logo del sistema encima del título, sin borde
+        logo_label = logo_manager.obtener_logo_widget(contenedor, size=(100, 100))
+        logo_label.pack(pady=(0, 15))
+        
+        # Título debajo del logo, centrado
         titulo_label = ctk.CTkLabel(
             contenedor, 
             text="Gestión de Datos para el Modelo Predictivo 2025",
             font=ctk.CTkFont(size=18, weight="bold"),
             text_color=("#1a237e", "#bbdefb")
         )
-        titulo_label.pack(pady=(10, 24))
+        titulo_label.pack(pady=(0, 24))
 
         # Scrollable frame para el contenido de datos
         self.scrollable_frame = ctk.CTkScrollableFrame(contenedor, width=800, height=500)

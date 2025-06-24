@@ -7,6 +7,7 @@ from typing import Dict, Callable
 
 from utils.file_utils import exportar_a_excel
 from utils.pdf_utils import generar_informe_pdf
+from utils.logo_utils import logo_manager
 from config.settings import EXCEL_FILE_TYPES, PDF_FILE_TYPES
 
 
@@ -33,14 +34,18 @@ class ExportacionView:
         contenedor = ctk.CTkFrame(self.frame)
         contenedor.pack(fill='both', expand=True, padx=30, pady=30)
 
-        # Título
+        # Logo del sistema encima del título, sin borde
+        logo_label = logo_manager.obtener_logo_widget(contenedor, size=(100, 100))
+        logo_label.pack(pady=(0, 15))
+        
+        # Título debajo del logo, centrado
         titulo_label = ctk.CTkLabel(
             contenedor, 
             text="Opciones de Exportación de Resultados",
             font=ctk.CTkFont(size=18, weight="bold"),
             text_color=("#1a237e", "#bbdefb")
         )
-        titulo_label.pack(pady=(30, 24))
+        titulo_label.pack(pady=(0, 24))
 
         # Frame para botones
         export_btn_frame = ctk.CTkFrame(contenedor)
