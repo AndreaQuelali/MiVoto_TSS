@@ -38,6 +38,13 @@ BOLIVIA_SUCCESS = BOLIVIA_GREEN      # Color de éxito
 BOLIVIA_WARNING = BOLIVIA_ORANGE     # Color de advertencia
 BOLIVIA_ERROR = BOLIVIA_RED          # Color de error
 
+# Colores específicos para pestañas
+BOLIVIA_TAB_NORMAL = "#FFE4B5"       # Pestaña normal (crema dorado claro)
+BOLIVIA_TAB_HOVER = "#FFDAB9"        # Pestaña al pasar mouse (crema dorado medio)
+BOLIVIA_TAB_SELECTED = BOLIVIA_RED   # Pestaña seleccionada (rojo boliviano)
+BOLIVIA_TAB_TEXT_NORMAL = "#2C3E50"  # Texto pestaña normal (gris oscuro)
+BOLIVIA_TAB_TEXT_SELECTED = "#FFFFFF" # Texto pestaña seleccionada (blanco)
+
 # Gradientes bolivianos
 BOLIVIA_GRADIENT_1 = [BOLIVIA_RED, BOLIVIA_YELLOW, BOLIVIA_GREEN]  # Bandera
 BOLIVIA_GRADIENT_2 = [BOLIVIA_DARK_GREEN, BOLIVIA_GREEN, BOLIVIA_YELLOW]  # Montañas

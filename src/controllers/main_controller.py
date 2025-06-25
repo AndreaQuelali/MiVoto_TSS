@@ -15,7 +15,9 @@ from config.settings import (WINDOW_TITLE, WINDOW_SIZE, DATOS_HISTORICOS_DEFAULT
                               ENCUESTAS_2025_DEFAULT, TOTAL_SENADORES, TOTAL_DIPUTADOS)
 from config.bolivian_theme import (
     BOLIVIA_RED, BOLIVIA_GREEN, BOLIVIA_YELLOW, BOLIVIA_BG_WARM,
-    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD
+    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD,
+    BOLIVIA_TAB_NORMAL, BOLIVIA_TAB_HOVER, BOLIVIA_TAB_SELECTED,
+    BOLIVIA_TAB_TEXT_NORMAL, BOLIVIA_TAB_TEXT_SELECTED
 )
 
 
@@ -52,6 +54,18 @@ class MainController:
         """Inicializa la interfaz principal de la aplicación."""
         self.tabview = ctk.CTkTabview(self.root)
         self.tabview.pack(fill='both', expand=True, padx=10, pady=10)
+        
+        # Configurar colores de las pestañas
+        self.tabview.configure(
+            fg_color=BOLIVIA_BG_WARM,
+            segmented_button_fg_color=BOLIVIA_TAB_NORMAL,
+            segmented_button_selected_color=BOLIVIA_TAB_SELECTED,
+            segmented_button_selected_hover_color=BOLIVIA_TAB_SELECTED,
+            segmented_button_unselected_color=BOLIVIA_TAB_NORMAL,
+            segmented_button_unselected_hover_color=BOLIVIA_TAB_HOVER,
+            text_color=BOLIVIA_TAB_TEXT_NORMAL,
+            text_color_disabled=BOLIVIA_TAB_TEXT_NORMAL
+        )
         
         # Crear vistas
         self.crear_vistas()
