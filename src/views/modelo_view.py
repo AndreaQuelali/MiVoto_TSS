@@ -11,7 +11,8 @@ from config.settings import (PESO_HISTORICO_DEFAULT, PESO_ENCUESTAS_DEFAULT,
 from utils.logo_utils import logo_manager
 from config.bolivian_theme import (
     BOLIVIA_RED, BOLIVIA_GREEN, BOLIVIA_YELLOW, BOLIVIA_BG_WARM,
-    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD
+    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD,
+    BOLIVIA_BG_CONTAINER, BOLIVIA_BG_FRAME
 )
 
 
@@ -48,7 +49,7 @@ class ModeloView:
         self.frame = ctk.CTkFrame(self.parent, fg_color=BOLIVIA_BG_WARM)
         
         # Contenedor principal centrado
-        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_WARM)
+        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_CONTAINER)
         contenedor.pack(fill='both', expand=True, padx=30, pady=30)
         
         # Logo del sistema encima del título, sin borde
@@ -65,7 +66,7 @@ class ModeloView:
         titulo_label.pack(pady=(0, 24))
 
         # Frame de ponderación
-        frame_ponderacion = ctk.CTkFrame(contenedor, fg_color=BOLIVIA_BG_WARM)
+        frame_ponderacion = ctk.CTkFrame(contenedor, fg_color=BOLIVIA_BG_FRAME)
         frame_ponderacion.pack(fill='x', padx=10, pady=12)
         ponderacion_label = ctk.CTkLabel(
             frame_ponderacion,
@@ -91,7 +92,7 @@ class ModeloView:
         frame_ponderacion.grid_columnconfigure(1, weight=1)
 
         # Frame de ajuste fino
-        frame_ajuste = ctk.CTkFrame(contenedor, fg_color=BOLIVIA_BG_WARM)
+        frame_ajuste = ctk.CTkFrame(contenedor, fg_color=BOLIVIA_BG_FRAME)
         frame_ajuste.pack(fill='x', padx=10, pady=12)
         ajuste_label = ctk.CTkLabel(
             frame_ajuste,

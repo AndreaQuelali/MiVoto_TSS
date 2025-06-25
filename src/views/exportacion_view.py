@@ -11,7 +11,8 @@ from utils.logo_utils import logo_manager
 from config.settings import EXCEL_FILE_TYPES, PDF_FILE_TYPES
 from config.bolivian_theme import (
     BOLIVIA_RED, BOLIVIA_GREEN, BOLIVIA_YELLOW, BOLIVIA_BG_WARM,
-    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD
+    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD,
+    BOLIVIA_BG_CONTAINER, BOLIVIA_BG_FRAME
 )
 
 
@@ -35,7 +36,7 @@ class ExportacionView:
         self.frame = ctk.CTkFrame(self.parent, fg_color=BOLIVIA_BG_WARM)
 
         # Contenedor principal centrado
-        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_WARM)
+        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_CONTAINER)
         contenedor.pack(fill='both', expand=True, padx=30, pady=30)
 
         # Logo del sistema encima del título, sin borde
@@ -52,7 +53,7 @@ class ExportacionView:
         titulo_label.pack(pady=(0, 24))
 
         # Frame para botones
-        export_btn_frame = ctk.CTkFrame(contenedor, fg_color=BOLIVIA_BG_WARM)
+        export_btn_frame = ctk.CTkFrame(contenedor, fg_color=BOLIVIA_BG_FRAME)
         export_btn_frame.pack(pady=30)
 
         # Botón para exportar a Excel

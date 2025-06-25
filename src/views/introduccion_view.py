@@ -5,7 +5,8 @@ import customtkinter as ctk
 from utils.logo_utils import logo_manager
 from config.bolivian_theme import (
     BOLIVIA_RED, BOLIVIA_GREEN, BOLIVIA_YELLOW, BOLIVIA_BG_WARM,
-    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD
+    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD,
+    BOLIVIA_BG_CONTAINER
 )
 
 
@@ -24,7 +25,7 @@ class IntroduccionView:
         self.frame = ctk.CTkFrame(self.parent, fg_color=BOLIVIA_BG_WARM)
 
         # Contenedor central
-        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_WARM)
+        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_CONTAINER)
         contenedor.pack(expand=True, fill="both", padx=40, pady=40)
 
         # Logo del sistema encima del título, sin borde

@@ -11,7 +11,8 @@ from utils.logo_utils import logo_manager
 from config.settings import EXCEL_CSV_FILE_TYPES
 from config.bolivian_theme import (
     BOLIVIA_RED, BOLIVIA_GREEN, BOLIVIA_YELLOW, BOLIVIA_BG_WARM,
-    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD
+    BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD,
+    BOLIVIA_BG_CONTAINER, BOLIVIA_BG_FRAME, BOLIVIA_BG_SECTION
 )
 
 
@@ -41,7 +42,7 @@ class DatosView:
         self.frame = ctk.CTkFrame(self.parent, fg_color=BOLIVIA_BG_WARM)
         
         # Contenedor principal centrado
-        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_WARM)
+        contenedor = ctk.CTkFrame(self.frame, fg_color=BOLIVIA_BG_CONTAINER)
         contenedor.pack(fill='both', expand=True, padx=30, pady=30)
         
         # Logo del sistema encima del título, sin borde
@@ -62,7 +63,7 @@ class DatosView:
         self.scrollable_frame.pack(fill='both', expand=True, padx=0, pady=0)
 
         # Sección de datos históricos
-        self.frame_historicos = ctk.CTkFrame(self.scrollable_frame, fg_color=BOLIVIA_BG_WARM)
+        self.frame_historicos = ctk.CTkFrame(self.scrollable_frame, fg_color=BOLIVIA_BG_SECTION)
         self.frame_historicos.pack(fill='x', padx=10, pady=10)
         historicos_label = ctk.CTkLabel(
             self.frame_historicos,
@@ -73,7 +74,7 @@ class DatosView:
         historicos_label.pack(pady=(12, 8))
 
         # Sección de encuestas 2025
-        self.frame_encuestas = ctk.CTkFrame(self.scrollable_frame, fg_color=BOLIVIA_BG_WARM)
+        self.frame_encuestas = ctk.CTkFrame(self.scrollable_frame, fg_color=BOLIVIA_BG_SECTION)
         self.frame_encuestas.pack(fill='x', padx=10, pady=10)
         encuestas_label = ctk.CTkLabel(
             self.frame_encuestas,
@@ -84,7 +85,7 @@ class DatosView:
         encuestas_label.pack(pady=(12, 8))
 
         # Botones para cargar nuevos datos
-        btn_frame = ctk.CTkFrame(self.scrollable_frame, fg_color=BOLIVIA_BG_WARM)
+        btn_frame = ctk.CTkFrame(self.scrollable_frame, fg_color=BOLIVIA_BG_FRAME)
         btn_frame.pack(pady=30)
         cargar_encuestas_btn = ctk.CTkButton(
             btn_frame, 

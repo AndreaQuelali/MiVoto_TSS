@@ -19,7 +19,11 @@ BOLIVIA_BLUE = "#0066CC"         # Azul (Wiphala)
 # Colores de fondo
 BOLIVIA_BG_LIGHT = "#F8F9FA"     # Fondo claro
 BOLIVIA_BG_DARK = "#2C3E50"      # Fondo oscuro
-BOLIVIA_BG_WARM = "#FFF8DC"      # Fondo cálido (crema suave)
+BOLIVIA_BG_WARM = "#FFF8DC"      # Fondo cálido (crema suave) - FONDO PRINCIPAL
+BOLIVIA_BG_FRAME = "#FFFFFF"     # Fondo para frames (blanco más claro)
+BOLIVIA_BG_CONTAINER = "#EBBB8E" # Fondo para contenedores (naranja medio)
+BOLIVIA_BG_SECTION = "#F5F5DC"   # Fondo para secciones (crema más oscuro)
+BOLIVIA_BG_CARD = "#FFFFFF"      # Fondo para tarjetas (blanco puro)
 
 # Colores de texto
 BOLIVIA_TEXT_DARK = "#2C3E50"    # Texto oscuro
@@ -47,6 +51,10 @@ BOLIVIAN_THEME = {
     'bg_color_light': BOLIVIA_BG_LIGHT,
     'bg_color_dark': BOLIVIA_BG_DARK,
     'bg_color_warm': BOLIVIA_BG_WARM,
+    'bg_color_frame': BOLIVIA_BG_FRAME,
+    'bg_color_container': BOLIVIA_BG_CONTAINER,
+    'bg_color_section': BOLIVIA_BG_SECTION,
+    'bg_color_card': BOLIVIA_BG_CARD,
     'text_color_dark': BOLIVIA_TEXT_DARK,
     'text_color_light': BOLIVIA_TEXT_LIGHT,
     'text_color_accent': BOLIVIA_TEXT_ACCENT,
