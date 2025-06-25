@@ -40,10 +40,47 @@ DATOS_HISTORICOS_DEFAULT = {
 
 # Encuestas 2025 por defecto
 ENCUESTAS_2025_DEFAULT = {
-    'Encuesta1': {'MAS': 48.0, 'CC': 32.0, 'Creemos': 15.0, 'FPV': 3.0, 'Nuevo': 2.0},
-    'Encuesta2': {'MAS': 45.0, 'CC': 35.0, 'Creemos': 12.0, 'FPV': 5.0, 'Nuevo': 3.0},
-    'Encuesta3': {'MAS': 50.0, 'CC': 30.0, 'Creemos': 13.0, 'FPV': 4.0, 'Nuevo': 3.0}
+    'Encuesta1': {
+        'MAS': 48.0,
+        'CC': 32.0,
+        'Creemos': 15.0,
+        'FPV': 3.0,
+        'ALIANZA UNIDAD': 1.0,
+        'LIBRE': 0.5,
+        'ALIANZA POPULAR': 0.5
+    },
+    'Encuesta2': {
+        'MAS': 45.0,
+        'CC': 35.0,
+        'Creemos': 12.0,
+        'FPV': 5.0,
+        'APB-SÚMATE': 1.0,
+        'PDC': 1.0,
+        'ALIANZA LA FUERZA DEL PUEBLO': 1.0
+    },
+    'Encuesta3': {
+        'MAS': 50.0,
+        'CC': 30.0,
+        'Creemos': 13.0,
+        'FPV': 4.0,
+        'MORENA': 1.0,
+        'NGP': 1.0,
+        'ADN': 1.0
+    },
+    'Encuesta4': {
+        'ALIANZA UNIDAD': 19.1,
+        'LIBRE': 18.4,
+        'ALIANZA POPULAR': 14.2,
+        'APB-SÚMATE': 7.9,
+        'PDC': 4.3,
+        'ALIANZA LA FUERZA DEL PUEBLO': 3.7,
+        'MAS': 2.3,
+        'MORENA': 1.7,
+        'NGP': 1.0,
+        'ADN': 0.5
+    }
 }
+
 
 # Configuración de archivos
 EXCEL_FILE_TYPES = [("Archivos Excel", "*.xlsx")]

@@ -6,7 +6,34 @@ import numpy as np
 from typing import Dict, List, Tuple
 from collections import defaultdict
 from config.settings import FIGURE_SIZE, DPI
+import random
+import hashlib
 
+# Diccionario de colores por partido
+PARTY_COLORS = {
+    'MAS': '#1976d2',        
+    'CC': '#ff9800',         
+    'APB-Súmate': '#8e24aa', 
+}
+
+# Paleta para asignar colores a partidos no definidos
+EXTRA_COLORS = [
+    '#009688', '#c62828', '#43a047', '#fbc02d', '#5d4037',
+    '#00bcd4', '#7e57c2', '#f06292', '#388e3c', '#ffa726',
+    '#455a64', '#d4e157', '#6d4c41', '#0288d1', '#cddc39',
+]
+
+def get_party_colors(parties):
+    colors = []
+    used = set(PARTY_COLORS.keys())
+    extra_idx = 0
+    for p in parties:
+        if p in PARTY_COLORS:
+            colors.append(PARTY_COLORS[p])
+        else:
+            hash_idx = int(hashlib.md5(p.encode()).hexdigest(), 16) % len(EXTRA_COLORS)
+            colors.append(EXTRA_COLORS[hash_idx])
+    return colors
 
 def crear_grafico_historicos(datos_historicos: Dict[str, Dict[str, float]], parent_frame):
     """
@@ -75,7 +102,7 @@ def crear_grafico_encuestas(encuestas_2025: Dict[str, Dict[str, float]], parent_
     parties = list(sorted_promedios.keys())
     percentages = list(sorted_promedios.values())
 
-    bars = ax_enc.bar(parties, percentages, color='#2ecc71')
+    bars = ax_enc.bar(parties, percentages, color=get_party_colors(parties))
 
     ax_enc.set_title("Promedio de Encuestas 2025")
     ax_enc.set_ylabel("Porcentaje de Votos (%)")
@@ -121,7 +148,7 @@ def crear_grafico_votos(prediccion_votos: Dict[str, float], parent_frame):
     parties = np.array(parties)[sorted_indices]
     percentages = np.array(percentages)[sorted_indices]
 
-    bars = ax_votos.bar(parties, percentages, color='#3498db')
+    bars = ax_votos.bar(parties, percentages, color=get_party_colors(parties))
 
     ax_votos.set_title("Predicción de Votos para Elecciones 2025")
     ax_votos.set_ylabel("Porcentaje de Votos (%)")
@@ -167,7 +194,7 @@ def crear_grafico_escanos(escanos_data: Dict[str, int], parent_frame, title_suff
     parties = np.array(parties)[sorted_indices]
     seats = np.array(seats)[sorted_indices]
 
-    bars = ax_escanos.bar(parties, seats, color='#e74c3c')
+    bars = ax_escanos.bar(parties, seats, color=get_party_colors(parties))
 
     ax_escanos.set_title(f"Distribución de {title_suffix} por Partido")
     ax_escanos.set_ylabel(f"Número de {title_suffix}")
@@ -210,7 +237,7 @@ def crear_grafico_pdf(prediccion_votos: Dict[str, float], senadores: Dict[str, i
     sorted_indices = np.argsort(percentages)[::-1]
     parties = np.array(parties)[sorted_indices]
     percentages = np.array(percentages)[sorted_indices]
-    ax_votos.bar(parties, percentages, color='#3498db')
+    ax_votos.bar(parties, percentages, color=get_party_colors(parties))
     ax_votos.set_title("Predicción de Votos para Elecciones 2025")
     ax_votos.set_ylabel("Porcentaje de Votos (%)")
     ax_votos.set_xlabel("Partido Político")
@@ -229,7 +256,7 @@ def crear_grafico_pdf(prediccion_votos: Dict[str, float], senadores: Dict[str, i
     sorted_indices_sen = np.argsort(seats_sen)[::-1]
     parties_sen = np.array(parties_sen)[sorted_indices_sen]
     seats_sen = np.array(seats_sen)[sorted_indices_sen]
-    ax_senadores.bar(parties_sen, seats_sen, color='#e74c3c')
+    ax_senadores.bar(parties_sen, seats_sen, color=get_party_colors(parties_sen))
     ax_senadores.set_title("Distribución de Senadores por Partido")
     ax_senadores.set_ylabel("Número de Senadores")
     ax_senadores.set_xlabel("Partido Político")
@@ -248,7 +275,7 @@ def crear_grafico_pdf(prediccion_votos: Dict[str, float], senadores: Dict[str, i
     sorted_indices_dip = np.argsort(seats_dip)[::-1]
     parties_dip = np.array(parties_dip)[sorted_indices_dip]
     seats_dip = np.array(seats_dip)[sorted_indices_dip]
-    ax_diputados.bar(parties_dip, seats_dip, color='#e74c3c')
+    ax_diputados.bar(parties_dip, seats_dip, color=get_party_colors(parties_dip))
     ax_diputados.set_title("Distribución de Diputados por Partido")
     ax_diputados.set_ylabel("Número de Diputados")
     ax_diputados.set_xlabel("Partido Político")
