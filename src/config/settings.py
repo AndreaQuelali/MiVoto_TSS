@@ -31,56 +31,65 @@ TEXT_COLOR = BOLIVIA_TEXT_DARK
 
 # Datos históricos de elecciones en Bolivia
 DATOS_HISTORICOS_DEFAULT = {
-    '2005': {'MAS': 53.7, 'PODEMOS': 28.6, 'UN': 7.8, 'MNR': 6.5, 'Otros': 3.4},
-    '2009': {'MAS': 64.2, 'PPB-CN': 26.5, 'UN': 5.7, 'Otros': 3.6},
-    '2014': {'MAS': 61.4, 'UD': 24.2, 'PDC': 9.0, 'Otros': 5.4},
-    '2019': {'MAS': 47.1, 'CC': 36.5, 'FPV': 8.9, 'Otros': 7.5},
-    '2020': {'MAS': 55.1, 'CC': 28.8, 'Creemos': 14.0, 'FPV': 1.6, 'Otros': 0.5}
+    '2005': {
+        'MAS': 53.7,
+        'PODEMOS': 28.6,
+        'UN': 7.8,
+        'MNR': 6.5,
+        'Otros': 3.4
+    },
+    '2009': {
+        'MAS': 64.2,
+        'PPB-CN': 26.5,
+        'UN': 5.7,
+        'AS': 2.3,
+        'Otros': 1.3
+    },
+    '2014': {
+        'MAS': 61.0,
+        'UD': 24.5,
+        'PDC': 9.1,
+        'MSM': 2.7,
+        'PVB-IEP': 2.7
+    },
+    '2019': {
+        'MAS': 47.1,
+        'CC': 36.5,
+        '21F': 8.8,
+        'PDC': 6.2,
+        'Otros': 1.4
+    },
+    '2020': {
+        'MAS IPSP': 54.73,
+        'CC': 29.16,
+        'CREEMOS': 14.06,
+        'FVP': 1.54,
+        'PAN BOL': 0.50
+    }
 }
 
 # Encuestas 2025 por defecto
 ENCUESTAS_2025_DEFAULT = {
     'Encuesta1': {
-        'MAS': 48.0,
-        'CC': 32.0,
-        'Creemos': 15.0,
-        'FPV': 3.0,
-        'ALIANZA UNIDAD': 1.0,
-        'LIBRE': 0.5,
-        'ALIANZA POPULAR': 0.5
+        'ALIANZA UNIDAD': 26.1,
+        'LIBRE': 25.2,
+        'ALIANZA POPULAR': 19.4,
+        'APB-SÚMATE': 10.8,
+        'PDC': 5.9,
+        'ALIANZA LA FUERZA DEL PUEBLO': 5.1,
+        'MAS': 3.1,
+        'MORENA': 2.3,
+        'NGP': 1.4,
+        'ADN': 0.7
     },
     'Encuesta2': {
-        'MAS': 45.0,
-        'CC': 35.0,
-        'Creemos': 12.0,
-        'FPV': 5.0,
-        'APB-SÚMATE': 1.0,
-        'PDC': 1.0,
-        'ALIANZA LA FUERZA DEL PUEBLO': 1.0
-    },
-    'Encuesta3': {
-        'MAS': 50.0,
-        'CC': 30.0,
-        'Creemos': 13.0,
-        'FPV': 4.0,
-        'MORENA': 1.0,
-        'NGP': 1.0,
-        'ADN': 1.0
-    },
-    'Encuesta4': {
-        'ALIANZA UNIDAD': 19.1,
-        'LIBRE': 18.4,
-        'ALIANZA POPULAR': 14.2,
-        'APB-SÚMATE': 7.9,
-        'PDC': 4.3,
-        'ALIANZA LA FUERZA DEL PUEBLO': 3.7,
-        'MAS': 2.3,
-        'MORENA': 1.7,
-        'NGP': 1.0,
-        'ADN': 0.5
+        'APB-SÚMATE': 23.22,
+        'LIBRE': 22.8,
+        'NGP': 21.0,
+        'ALIANZA UNIDAD': 19.8,
+        'MAS': 13.18
     }
 }
-
 
 # Configuración de archivos
 EXCEL_FILE_TYPES = [("Archivos Excel", "*.xlsx")]

@@ -3,7 +3,8 @@ Vista para la gestión de datos históricos y encuestas
 """
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
-from typing import Dict, Callable
+from typing import Dict, Callable, Optional
+import tkinter as tk
 
 from utils.chart_utils import crear_grafico_historicos, crear_grafico_encuestas
 from utils.file_utils import cargar_encuestas_desde_archivo, cargar_historicos_desde_archivo
@@ -22,7 +23,7 @@ class DatosView:
     """
     
     def __init__(self, parent, datos_historicos: Dict, encuestas_2025: Dict, 
-                 on_datos_actualizados: Callable = None):
+                 on_datos_actualizados: Optional[Callable] = None):
         self.parent = parent
         self.datos_historicos = datos_historicos
         self.encuestas_2025 = encuestas_2025
@@ -150,10 +151,22 @@ class DatosView:
         all_parties = sorted(list(set(p for data in self.datos_historicos.values() for p in data.keys())))
         columns = ['Año'] + all_parties
 
+        # Frame para contener la tabla y el scrollbar
+        tabla_frame = ctk.CTkFrame(self.frame_historicos, fg_color="transparent")
+        tabla_frame.pack(fill='both', expand=True, padx=10, pady=5)
+
         # Crear tabla usando CTkTextbox para simular una tabla
-        self.tree_historicos = ctk.CTkTextbox(self.frame_historicos, height=200, fg_color="#f5f5f5")
-        self.tree_historicos.pack(fill='both', expand=True, padx=10, pady=5)
+        self.tree_historicos = ctk.CTkTextbox(tabla_frame, height=200, fg_color="#f5f5f5", wrap="none")
+        self.tree_historicos.pack(side='left', fill='both', expand=True)
         self.tree_historicos.configure(font=("Consolas", 13, "bold"))
+
+        # Scrollbar horizontal
+        h_scroll = tk.Scrollbar(tabla_frame, orient='horizontal', command=self.tree_historicos.xview)
+        h_scroll.pack(side='bottom', fill='x')
+        self.tree_historicos.configure(xscrollcommand=h_scroll.set)
+
+        # --- DRAG TO SCROLL ---
+        self._add_drag_to_scroll(self.tree_historicos)
 
         # Crear encabezados
         header = "Año".ljust(8)
@@ -168,8 +181,7 @@ class DatosView:
             for party in all_parties:
                 row += f"{data.get(party, 0):.1f}%".ljust(12)
             self.tree_historicos.insert("end", row + "\n")
-            if idx == 0:
-                self.tree_historicos.insert("end", "-" * len(header) + "\n")
+            self.tree_historicos.insert("end", "-" * len(header) + "\n")
 
         self.tree_historicos.configure(state="disabled")
     
@@ -192,10 +204,22 @@ class DatosView:
         all_parties = sorted(list(set(p for data in self.encuestas_2025.values() for p in data.keys())))
         columns = ['Encuesta'] + all_parties
 
+        # Frame para contener la tabla y el scrollbar
+        tabla_frame = ctk.CTkFrame(self.frame_encuestas, fg_color="transparent")
+        tabla_frame.pack(fill='both', expand=True, padx=10, pady=5)
+
         # Crear tabla usando CTkTextbox para simular una tabla
-        self.tree_encuestas = ctk.CTkTextbox(self.frame_encuestas, height=150, fg_color="#f5f5f5")
-        self.tree_encuestas.pack(fill='both', expand=True, padx=10, pady=5)
+        self.tree_encuestas = ctk.CTkTextbox(tabla_frame, height=150, fg_color="#f5f5f5", wrap="none")
+        self.tree_encuestas.pack(side='left', fill='both', expand=True)
         self.tree_encuestas.configure(font=("Consolas", 13, "bold"))
+
+        # Scrollbar horizontal
+        h_scroll = tk.Scrollbar(tabla_frame, orient='horizontal', command=self.tree_encuestas.xview)
+        h_scroll.pack(side='bottom', fill='x')
+        self.tree_encuestas.configure(xscrollcommand=h_scroll.set)
+
+        # --- DRAG TO SCROLL ---
+        self._add_drag_to_scroll(self.tree_encuestas)
 
         # Crear encabezados
         header = "Encuesta".ljust(15)
@@ -210,8 +234,7 @@ class DatosView:
             for party in all_parties:
                 row += f"{data.get(party, 0):.1f}%".ljust(12)
             self.tree_encuestas.insert("end", row + "\n")
-            if idx == 0:
-                self.tree_encuestas.insert("end", "-" * len(header) + "\n")
+            self.tree_encuestas.insert("end", "-" * len(header) + "\n")
 
         self.tree_encuestas.configure(state="disabled")
     
@@ -266,3 +289,25 @@ class DatosView:
     def obtener_frame(self):
         """Retorna el frame de la vista."""
         return self.frame 
+
+    def _add_drag_to_scroll(self, textbox):
+        """Permite hacer drag-to-scroll horizontal en un CTkTextbox."""
+        def on_mouse_down(event):
+            textbox._drag_scroll_x = event.x
+            textbox._drag_scroll_start = textbox.xview()
+            textbox._dragging = True
+
+        def on_mouse_move(event):
+            if getattr(textbox, '_dragging', False):
+                dx = event.x - textbox._drag_scroll_x
+                # Ajusta la sensibilidad del scroll (mayor divisor = más lento)
+                factor = 2.0 * (textbox.winfo_width() or 1)
+                start = textbox._drag_scroll_start[0] - dx / factor
+                textbox.xview_moveto(max(0, min(1, start)))
+
+        def on_mouse_up(event):
+            textbox._dragging = False
+
+        textbox.bind('<Button-1>', on_mouse_down)
+        textbox.bind('<B1-Motion>', on_mouse_move)
+        textbox.bind('<ButtonRelease-1>', on_mouse_up) 
