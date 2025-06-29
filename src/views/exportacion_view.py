@@ -3,7 +3,7 @@ Vista para la exportación de resultados
 """
 import customtkinter as ctk
 from tkinter import filedialog, messagebox
-from typing import Dict, Callable
+from typing import Dict, Callable, Optional
 
 from utils.file_utils import exportar_a_excel
 from utils.pdf_utils import generar_informe_pdf
@@ -21,12 +21,16 @@ class ExportacionView:
     Vista para la exportación de resultados.
     """
     
-    def __init__(self, parent, prediccion_votos: Dict = None, senadores: Dict = None, 
-                 diputados: Dict = None):
+    def __init__(self, parent, prediccion_votos: Optional[Dict] = None, senadores: Optional[Dict] = None, 
+                 diputados: Optional[Dict] = None):
         self.parent = parent
         self.prediccion_votos = prediccion_votos or {}
         self.senadores = senadores or {}
         self.diputados = diputados or {}
+        self.diputados_plurinominales: Dict = {}
+        self.diputados_uninominales: Dict = {}
+        self.diputados_uninominales_por_depto: Dict = {}
+        self.detalle_escanos: Dict = {}
         
         self.frame = None
         self.crear_vista()
@@ -85,7 +89,7 @@ class ExportacionView:
         # Información adicional
         info_label = ctk.CTkLabel(
             contenedor,
-            text="Nota: Ejecute la predicción en la pestaña 'Configuración del Modelo' antes de exportar.",
+            text="Nota: Ejecute la predicción en la pestaña 'Configuración del Modelo' antes de exportar.\n\nLa exportación incluirá:\n• Resultados de votación\n• Distribución de senadores\n• Distribución de diputados (plurinominales y uninominales)\n• Detalle de escaños por departamento",
             font=ctk.CTkFont(size=12),
             text_color=(BOLIVIA_TEXT_DARK, BOLIVIA_TEXT_DARK),
             wraplength=500,
@@ -108,7 +112,18 @@ class ExportacionView:
             return
 
         try:
-            exportar_a_excel(file_path, self.prediccion_votos, self.senadores, self.diputados)
+            # Crear diccionario con todos los datos de escaños
+            datos_completos = {
+                'prediccion_votos': self.prediccion_votos,
+                'senadores': self.senadores,
+                'diputados': self.diputados,
+                'diputados_plurinominales': self.diputados_plurinominales,
+                'diputados_uninominales': self.diputados_uninominales,
+                'diputados_uninominales_por_depto': self.diputados_uninominales_por_depto,
+                'detalle_escanos': self.detalle_escanos
+            }
+            
+            exportar_a_excel(file_path, datos_completos)
             messagebox.showinfo("Éxito", f"Resultados exportados a '{file_path}' exitosamente.")
         except Exception as e:
             messagebox.showerror("Error de Exportación", str(e))
@@ -128,16 +143,35 @@ class ExportacionView:
             return
 
         try:
-            generar_informe_pdf(file_path, self.prediccion_votos, self.senadores, self.diputados)
+            # Crear diccionario con todos los datos de escaños
+            datos_completos = {
+                'prediccion_votos': self.prediccion_votos,
+                'senadores': self.senadores,
+                'diputados': self.diputados,
+                'diputados_plurinominales': self.diputados_plurinominales,
+                'diputados_uninominales': self.diputados_uninominales,
+                'diputados_uninominales_por_depto': self.diputados_uninominales_por_depto,
+                'detalle_escanos': self.detalle_escanos
+            }
+            
+            generar_informe_pdf(file_path, datos_completos)
             messagebox.showinfo("Éxito", f"Informe PDF generado en '{file_path}' exitosamente.")
         except Exception as e:
             messagebox.showerror("Error de PDF", str(e))
     
-    def actualizar_datos(self, prediccion_votos: Dict, senadores: Dict, diputados: Dict):
-        """Actualiza los datos para exportación."""
+    def actualizar_datos(self, prediccion_votos: Dict, senadores: Dict, diputados: Dict, 
+                        diputados_plurinominales: Optional[Dict] = None, 
+                        diputados_uninominales: Optional[Dict] = None,
+                        diputados_uninominales_por_depto: Optional[Dict] = None, 
+                        detalle_escanos: Optional[Dict] = None):
+        """Actualiza los datos para exportación incluyendo información detallada de escaños."""
         self.prediccion_votos = prediccion_votos
         self.senadores = senadores
         self.diputados = diputados
+        self.diputados_plurinominales = diputados_plurinominales or {}
+        self.diputados_uninominales = diputados_uninominales or {}
+        self.diputados_uninominales_por_depto = diputados_uninominales_por_depto or {}
+        self.detalle_escanos = detalle_escanos or {}
     
     def obtener_frame(self):
         """Retorna el frame de la vista."""

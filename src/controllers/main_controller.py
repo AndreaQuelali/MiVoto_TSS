@@ -12,6 +12,7 @@ from views.modelo_view import ModeloView
 from views.resultados_view import ResultadosView
 from views.exportacion_view import ExportacionView
 from views.detalle_escanos_view import DetalleEscanosView
+from views.partidos_view import PartidosView
 from config.settings import (WINDOW_TITLE, WINDOW_SIZE, DATOS_HISTORICOS_DEFAULT, 
                               ENCUESTAS_2025_DEFAULT, TOTAL_SENADORES, TOTAL_DIPUTADOS)
 from config.bolivian_theme import (
@@ -48,6 +49,7 @@ class MainController:
         self.resultados_view = None
         self.exportacion_view = None
         self.detalle_escanos_view = None
+        self.partidos_view = None
         
         # Inicializar interfaz
         self.inicializar_interfaz()
@@ -106,17 +108,23 @@ class MainController:
         self.resultados_view = ResultadosView(resultados_tab, self.simular_segunda_vuelta)
         self.resultados_view.obtener_frame().pack(fill="both", expand=True)
 
-        # Exportar Resultados
-        self.tabview.add("Exportar Resultados")
-        exportar_tab = self.tabview.tab("Exportar Resultados")
-        self.exportacion_view = ExportacionView(exportar_tab)
-        self.exportacion_view.obtener_frame().pack(fill="both", expand=True)
-
         # Detalle de Escaños
         self.tabview.add("Detalle de Escaños")
         detalle_escanos_tab = self.tabview.tab("Detalle de Escaños")
         self.detalle_escanos_view = DetalleEscanosView(detalle_escanos_tab)
         self.detalle_escanos_view.obtener_frame().pack(fill="both", expand=True)
+
+        # Partidos Políticos y Postulantes
+        self.tabview.add("Partidos y Postulantes")
+        partidos_tab = self.tabview.tab("Partidos y Postulantes")
+        self.partidos_view = PartidosView(partidos_tab)
+        self.partidos_view.obtener_frame().pack(fill="both", expand=True)
+
+        # Exportar Resultados (movido al final)
+        self.tabview.add("Exportar Resultados")
+        exportar_tab = self.tabview.tab("Exportar Resultados")
+        self.exportacion_view = ExportacionView(exportar_tab)
+        self.exportacion_view.obtener_frame().pack(fill="both", expand=True)
     
     def on_datos_actualizados(self):
         """Callback cuando se actualizan los datos."""
@@ -208,11 +216,15 @@ class MainController:
         if self.detalle_escanos_view and 'detalle_escanos' in resultados:
             self.detalle_escanos_view.actualizar_detalle(resultados['detalle_escanos'])
         
-        # Actualizar vista de exportación
+        # Actualizar vista de exportación con todos los datos de escaños
         self.exportacion_view.actualizar_datos(
             resultados['prediccion_votos'],
             resultados['senadores'],
-            resultados['diputados']
+            resultados['diputados'],
+            resultados.get('diputados_plurinominales'),
+            resultados.get('diputados_uninominales'),
+            resultados.get('diputados_uninominales_por_depto'),
+            resultados.get('detalle_escanos')
         )
     
     def ejecutar(self):

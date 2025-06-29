@@ -97,7 +97,7 @@ def crear_grafico_encuestas(encuestas_2025: Dict[str, Dict[str, float]], parent_
             party_votes[party].append(votes)
 
     promedios = {p: np.mean(v) for p, v in party_votes.items()}
-    sorted_promedios = dict(sorted(promedios.items(), key=lambda item: item[1], reverse=True))
+    sorted_promedios = dict(sorted(promedios.items(), key=lambda item: float(item[1]), reverse=True))
 
     parties = list(sorted_promedios.keys())
     percentages = list(sorted_promedios.values())
@@ -230,61 +230,80 @@ def crear_grafico_pdf(prediccion_votos: Dict[str, float], senadores: Dict[str, i
     Returns:
         Tuple[str, str, str]: Rutas de los archivos temporales de gráficos
     """
-    # Gráfico de Votos
-    fig_votos, ax_votos = plt.subplots(figsize=(8, 4))
-    parties = list(prediccion_votos.keys())
-    percentages = list(prediccion_votos.values())
-    sorted_indices = np.argsort(percentages)[::-1]
-    parties = np.array(parties)[sorted_indices]
-    percentages = np.array(percentages)[sorted_indices]
-    ax_votos.bar(parties, percentages, color=get_party_colors(parties))
-    ax_votos.set_title("Predicción de Votos para Elecciones 2025")
-    ax_votos.set_ylabel("Porcentaje de Votos (%)")
-    ax_votos.set_xlabel("Partido Político")
-    ax_votos.grid(True, linestyle='--', alpha=0.7, axis='y')
-    ax_votos.set_ylim(0, max(percentages) * 1.2 if percentages.size > 0 else 100)
-    fig_votos.tight_layout()
-    
     img_path_votos = "temp_votos_prediccion.png"
-    fig_votos.savefig(img_path_votos, dpi=DPI)
-    plt.close(fig_votos)
+    img_path_senadores = "temp_senadores_distribucion.png"
+    img_path_diputados = "temp_diputados_distribucion.png"
+    
+    # Gráfico de Votos
+    if prediccion_votos:
+        try:
+            fig_votos, ax_votos = plt.subplots(figsize=(8, 4))
+            parties = list(prediccion_votos.keys())
+            percentages = list(prediccion_votos.values())
+            
+            if parties and percentages:
+                sorted_indices = np.argsort(percentages)[::-1]
+                parties = np.array(parties)[sorted_indices]
+                percentages = np.array(percentages)[sorted_indices]
+                ax_votos.bar(parties, percentages, color=get_party_colors(parties))
+                ax_votos.set_title("Predicción de Votos para Elecciones 2025")
+                ax_votos.set_ylabel("Porcentaje de Votos (%)")
+                ax_votos.set_xlabel("Partido Político")
+                ax_votos.grid(True, linestyle='--', alpha=0.7, axis='y')
+                ax_votos.set_ylim(0, max(percentages) * 1.2 if percentages.size > 0 else 100)
+                fig_votos.tight_layout()
+                
+                fig_votos.savefig(img_path_votos, dpi=DPI)
+                plt.close(fig_votos)
+        except Exception as e:
+            print(f"Error generando gráfico de votos: {e}")
 
     # Gráfico de Senadores
-    fig_senadores, ax_senadores = plt.subplots(figsize=(8, 4))
-    parties_sen = list(senadores.keys())
-    seats_sen = list(senadores.values())
-    sorted_indices_sen = np.argsort(seats_sen)[::-1]
-    parties_sen = np.array(parties_sen)[sorted_indices_sen]
-    seats_sen = np.array(seats_sen)[sorted_indices_sen]
-    ax_senadores.bar(parties_sen, seats_sen, color=get_party_colors(parties_sen))
-    ax_senadores.set_title("Distribución de Senadores por Partido")
-    ax_senadores.set_ylabel("Número de Senadores")
-    ax_senadores.set_xlabel("Partido Político")
-    ax_senadores.grid(True, linestyle='--', alpha=0.7, axis='y')
-    ax_senadores.set_ylim(0, max(seats_sen) * 1.2 if seats_sen.size > 0 else 10)
-    fig_senadores.tight_layout()
+    if senadores:
+        try:
+            fig_senadores, ax_senadores = plt.subplots(figsize=(8, 4))
+            parties_sen = list(senadores.keys())
+            seats_sen = list(senadores.values())
+            
+            if parties_sen and seats_sen:
+                sorted_indices_sen = np.argsort(seats_sen)[::-1]
+                parties_sen = np.array(parties_sen)[sorted_indices_sen]
+                seats_sen = np.array(seats_sen)[sorted_indices_sen]
+                ax_senadores.bar(parties_sen, seats_sen, color=get_party_colors(parties_sen))
+                ax_senadores.set_title("Distribución de Senadores por Partido")
+                ax_senadores.set_ylabel("Número de Senadores")
+                ax_senadores.set_xlabel("Partido Político")
+                ax_senadores.grid(True, linestyle='--', alpha=0.7, axis='y')
+                ax_senadores.set_ylim(0, max(seats_sen) * 1.2 if seats_sen.size > 0 else 10)
+                fig_senadores.tight_layout()
 
-    img_path_senadores = "temp_senadores_distribucion.png"
-    fig_senadores.savefig(img_path_senadores, dpi=DPI)
-    plt.close(fig_senadores)
+                fig_senadores.savefig(img_path_senadores, dpi=DPI)
+                plt.close(fig_senadores)
+        except Exception as e:
+            print(f"Error generando gráfico de senadores: {e}")
 
     # Gráfico de Diputados
-    fig_diputados, ax_diputados = plt.subplots(figsize=(8, 4))
-    parties_dip = list(diputados.keys())
-    seats_dip = list(diputados.values())
-    sorted_indices_dip = np.argsort(seats_dip)[::-1]
-    parties_dip = np.array(parties_dip)[sorted_indices_dip]
-    seats_dip = np.array(seats_dip)[sorted_indices_dip]
-    ax_diputados.bar(parties_dip, seats_dip, color=get_party_colors(parties_dip))
-    ax_diputados.set_title("Distribución de Diputados por Partido")
-    ax_diputados.set_ylabel("Número de Diputados")
-    ax_diputados.set_xlabel("Partido Político")
-    ax_diputados.grid(True, linestyle='--', alpha=0.7, axis='y')
-    ax_diputados.set_ylim(0, max(seats_dip) * 1.2 if seats_dip.size > 0 else 10)
-    fig_diputados.tight_layout()
+    if diputados:
+        try:
+            fig_diputados, ax_diputados = plt.subplots(figsize=(8, 4))
+            parties_dip = list(diputados.keys())
+            seats_dip = list(diputados.values())
+            
+            if parties_dip and seats_dip:
+                sorted_indices_dip = np.argsort(seats_dip)[::-1]
+                parties_dip = np.array(parties_dip)[sorted_indices_dip]
+                seats_dip = np.array(seats_dip)[sorted_indices_dip]
+                ax_diputados.bar(parties_dip, seats_dip, color=get_party_colors(parties_dip))
+                ax_diputados.set_title("Distribución de Diputados por Partido")
+                ax_diputados.set_ylabel("Número de Diputados")
+                ax_diputados.set_xlabel("Partido Político")
+                ax_diputados.grid(True, linestyle='--', alpha=0.7, axis='y')
+                ax_diputados.set_ylim(0, max(seats_dip) * 1.2 if seats_dip.size > 0 else 10)
+                fig_diputados.tight_layout()
 
-    img_path_diputados = "temp_diputados_distribucion.png"
-    fig_diputados.savefig(img_path_diputados, dpi=DPI)
-    plt.close(fig_diputados)
+                fig_diputados.savefig(img_path_diputados, dpi=DPI)
+                plt.close(fig_diputados)
+        except Exception as e:
+            print(f"Error generando gráfico de diputados: {e}")
 
     return img_path_votos, img_path_senadores, img_path_diputados 
