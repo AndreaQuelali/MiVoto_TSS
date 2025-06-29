@@ -11,6 +11,7 @@ from views.datos_view import DatosView
 from views.modelo_view import ModeloView
 from views.resultados_view import ResultadosView
 from views.exportacion_view import ExportacionView
+from views.detalle_escanos_view import DetalleEscanosView
 from config.settings import (WINDOW_TITLE, WINDOW_SIZE, DATOS_HISTORICOS_DEFAULT, 
                               ENCUESTAS_2025_DEFAULT, TOTAL_SENADORES, TOTAL_DIPUTADOS)
 from config.bolivian_theme import (
@@ -46,6 +47,7 @@ class MainController:
         self.modelo_view = None
         self.resultados_view = None
         self.exportacion_view = None
+        self.detalle_escanos_view = None
         
         # Inicializar interfaz
         self.inicializar_interfaz()
@@ -109,6 +111,12 @@ class MainController:
         exportar_tab = self.tabview.tab("Exportar Resultados")
         self.exportacion_view = ExportacionView(exportar_tab)
         self.exportacion_view.obtener_frame().pack(fill="both", expand=True)
+
+        # Detalle de Escaños
+        self.tabview.add("Detalle de Escaños")
+        detalle_escanos_tab = self.tabview.tab("Detalle de Escaños")
+        self.detalle_escanos_view = DetalleEscanosView(detalle_escanos_tab)
+        self.detalle_escanos_view.obtener_frame().pack(fill="both", expand=True)
     
     def on_datos_actualizados(self):
         """Callback cuando se actualizan los datos."""
@@ -190,8 +198,15 @@ class MainController:
             resultados['senadores'],
             resultados['diputados'],
             resultados['segunda_vuelta'],
-            resultados['candidatos_segunda_vuelta']
+            resultados['candidatos_segunda_vuelta'],
+            resultados.get('diputados_plurinominales'),
+            resultados.get('diputados_uninominales'),
+            resultados.get('diputados_uninominales_por_depto')
         )
+        
+        # Actualizar vista de detalle de escaños
+        if self.detalle_escanos_view and 'detalle_escanos' in resultados:
+            self.detalle_escanos_view.actualizar_detalle(resultados['detalle_escanos'])
         
         # Actualizar vista de exportación
         self.exportacion_view.actualizar_datos(

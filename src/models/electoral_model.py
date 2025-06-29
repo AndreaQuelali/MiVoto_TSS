@@ -5,7 +5,10 @@ import numpy as np
 from typing import Dict, List, Tuple
 from collections import defaultdict
 
-from utils.electoral_utils import verificar_segunda_vuelta, calcular_escanos, simular_segunda_vuelta
+from utils.electoral_utils import (
+    verificar_segunda_vuelta, calcular_escanos, simular_segunda_vuelta,
+    obtener_detalle_escanos
+)
 
 
 class ModeloPredictivoElectoral:
@@ -20,6 +23,12 @@ class ModeloPredictivoElectoral:
         self.senadores_2025 = {}
         self.diputados_2025 = {}
         self.prediccion_segunda_vuelta = {}
+        
+        # Nuevas variables para escaños detallados
+        self.diputados_plurinominales_2025 = {}
+        self.diputados_uninominales_2025 = {}
+        self.diputados_uninominales_por_depto_2025 = {}
+        self.detalle_escanos_2025 = {}
         
         # Variables del modelo
         self.peso_historico = 0.4
@@ -110,13 +119,15 @@ class ModeloPredictivoElectoral:
         # Verificar segunda vuelta
         self.segunda_vuelta, self.candidatos_segunda_vuelta = verificar_segunda_vuelta(self.prediccion_2025)
         
-        # Calcular escaños
-        self.senadores_2025, self.diputados_2025 = calcular_escanos(
-            self.prediccion_2025, 
-            self.umbral_minimo, 
-            self.total_senadores, 
-            self.total_diputados
-        )
+        # Calcular escaños con detalle
+        self.detalle_escanos_2025 = obtener_detalle_escanos(self.prediccion_2025, self.umbral_minimo)
+        
+        # Extraer resultados específicos
+        self.senadores_2025 = self.detalle_escanos_2025['senadores']
+        self.diputados_plurinominales_2025 = self.detalle_escanos_2025['diputados_plurinominales']
+        self.diputados_uninominales_2025 = self.detalle_escanos_2025['diputados_uninominales']
+        self.diputados_uninominales_por_depto_2025 = self.detalle_escanos_2025['diputados_uninominales_por_depto']
+        self.diputados_2025 = self.detalle_escanos_2025['total_diputados']
         
         self.prediccion_ejecutada = True
     
@@ -148,11 +159,33 @@ class ModeloPredictivoElectoral:
             'prediccion_votos': self.prediccion_2025,
             'senadores': self.senadores_2025,
             'diputados': self.diputados_2025,
+            'diputados_plurinominales': self.diputados_plurinominales_2025,
+            'diputados_uninominales': self.diputados_uninominales_2025,
+            'diputados_uninominales_por_depto': self.diputados_uninominales_por_depto_2025,
+            'detalle_escanos': self.detalle_escanos_2025,
             'segunda_vuelta': self.segunda_vuelta,
             'candidatos_segunda_vuelta': self.candidatos_segunda_vuelta,
             'prediccion_segunda_vuelta': self.prediccion_segunda_vuelta,
             'prediccion_ejecutada': self.prediccion_ejecutada
         }
+    
+    def obtener_detalle_escanos(self) -> Dict[str, any]:
+        """
+        Obtiene el detalle completo de la distribución de escaños.
+        
+        Returns:
+            Dict con el detalle completo de escaños
+        """
+        return self.detalle_escanos_2025
+    
+    def obtener_escanos_por_departamento(self) -> Dict[str, Dict[str, int]]:
+        """
+        Obtiene la distribución de escaños uninominales por departamento.
+        
+        Returns:
+            Dict con escaños por departamento y partido
+        """
+        return self.diputados_uninominales_por_depto_2025
     
     def obtener_estado_segunda_vuelta(self) -> Tuple[bool, List[str]]:
         """

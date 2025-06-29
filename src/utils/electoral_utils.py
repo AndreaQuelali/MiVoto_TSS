@@ -3,6 +3,11 @@ Utilidades para cálculos electorales
 """
 from collections import defaultdict
 from typing import Dict, List, Tuple, Any
+from config.settings import (
+    DIPUTADOS_UNINOMINALES, DIPUTADOS_PLURINOMINALES,
+    CIRCUNSCRIPCIONES_UNINOMINALES, DEPARTAMENTOS_BOLIVIA,
+    SENADORES_POR_DEPARTAMENTO
+)
 
 
 def verificar_segunda_vuelta(votos: Dict[str, float]) -> Tuple[bool, List[str]]:
@@ -61,6 +66,102 @@ def calcular_dhondt(votos_partidos: Dict[str, float], total_escanos: int) -> Dic
     return dict(escanos)
 
 
+def calcular_escanos_plurinominales(prediccion_votos: Dict[str, float], umbral_minimo: float, 
+                                   total_escanos: int) -> Dict[str, int]:
+    """
+    Calcula la distribución de escaños plurinominales usando el método D'Hondt.
+    
+    Args:
+        prediccion_votos: Diccionario con la predicción de votos por partido
+        umbral_minimo: Umbral mínimo de votos para obtener escaños
+        total_escanos: Número total de escaños a distribuir
+        
+    Returns:
+        Dict[str, int]: Diccionario con los escaños plurinominales asignados por partido
+    """
+    partidos_validos_votos = {p: v for p, v in prediccion_votos.items()
+                              if v >= (umbral_minimo * 100)}
+
+    if not partidos_validos_votos:
+        return {}
+
+    total_votos_validos = sum(partidos_validos_votos.values())
+    if total_votos_validos == 0:
+        return {}
+
+    votos_normalizados = {p: v / total_votos_validos for p, v in partidos_validos_votos.items()}
+    
+    return calcular_dhondt(votos_normalizados, total_escanos)
+
+
+def simular_escanos_uninominales(prediccion_votos: Dict[str, float], 
+                                circunscripciones: Dict[str, int]) -> Dict[str, Dict[str, int]]:
+    """
+    Simula la distribución de escaños uninominales por departamento.
+    Esta simulación considera la fuerza electoral de cada partido y las características territoriales.
+    
+    Args:
+        prediccion_votos: Diccionario con la predicción de votos por partido
+        circunscripciones: Diccionario con el número de escaños por departamento
+        
+    Returns:
+        Dict[str, Dict[str, int]]: Diccionario con escaños uninominales por departamento y partido
+    """
+    escanos_uninominales = {}
+    
+    # Ordenar partidos por fuerza electoral
+    partidos_ordenados = sorted(prediccion_votos.items(), key=lambda x: x[1], reverse=True)
+    
+    for departamento, num_escanos in circunscripciones.items():
+        escanos_departamento = {}
+        
+        # Distribuir escaños basándose en la fuerza electoral nacional
+        # pero con variaciones regionales simuladas
+        for i, (partido, porcentaje_nacional) in enumerate(partidos_ordenados):
+            if i >= num_escanos:
+                break
+                
+            # Simular variación regional (partidos pueden tener diferente fuerza por departamento)
+            # Por ejemplo, algunos partidos pueden ser más fuertes en ciertas regiones
+            variacion_regional = 1.0
+            
+            # Simular patrones regionales conocidos
+            if departamento in ['La Paz', 'Cochabamba'] and partido in ['MAS', 'ALIANZA UNIDAD']:
+                variacion_regional = 1.2  # Más fuertes en el occidente
+            elif departamento in ['Santa Cruz', 'Tarija'] and partido in ['LIBRE', 'APB-SÚMATE']:
+                variacion_regional = 1.3  # Más fuertes en el oriente
+            elif departamento in ['Oruro', 'Potosí'] and partido in ['MAS', 'ALIANZA POPULAR']:
+                variacion_regional = 1.1  # Más fuertes en el altiplano
+            
+            # Calcular escaños asignados considerando la variación regional
+            escanos_asignados = max(1, int((porcentaje_nacional / 100) * num_escanos * variacion_regional))
+            
+            # Asegurar que no se exceda el número de escaños disponibles
+            escanos_disponibles = num_escanos - sum(escanos_departamento.values())
+            if escanos_disponibles > 0:
+                escanos_finales = min(escanos_asignados, escanos_disponibles)
+                if escanos_finales > 0:
+                    escanos_departamento[partido] = escanos_finales
+        
+        # Si quedan escaños sin asignar, distribuirlos entre los partidos más fuertes
+        escanos_restantes = num_escanos - sum(escanos_departamento.values())
+        if escanos_restantes > 0:
+            # Dar prioridad a los partidos más fuertes
+            for partido, _ in partidos_ordenados:
+                if escanos_restantes <= 0:
+                    break
+                if partido not in escanos_departamento:
+                    escanos_departamento[partido] = 1
+                    escanos_restantes -= 1
+                elif escanos_departamento[partido] < 2:  # Máximo 2 escaños por partido en departamentos pequeños
+                    escanos_departamento[partido] += 1
+                    escanos_restantes -= 1
+        
+        escanos_uninominales[departamento] = escanos_departamento
+    
+    return escanos_uninominales
+
+
 def calcular_escanos(prediccion_votos: Dict[str, float], umbral_minimo: float, 
                     total_senadores: int, total_diputados: int) -> Tuple[Dict[str, int], Dict[str, int]]:
     """
@@ -76,25 +177,84 @@ def calcular_escanos(prediccion_votos: Dict[str, float], umbral_minimo: float,
     Returns:
         Tuple[Dict[str, int], Dict[str, int]]: (escaños_senadores, escaños_diputados)
     """
-    partidos_validos_votos = {p: v for p, v in prediccion_votos.items()
-                              if v >= (umbral_minimo * 100)}
-
-    if not partidos_validos_votos:
-        return {}, {}
-
-    total_votos_validos = sum(partidos_validos_votos.values())
-    if total_votos_validos == 0:
-        return {}, {}
-
-    votos_normalizados = {p: v / total_votos_validos for p, v in partidos_validos_votos.items()}
-
+    # Calcular escaños plurinominales (lista nacional)
+    diputados_plurinominales = calcular_escanos_plurinominales(
+        prediccion_votos, umbral_minimo, DIPUTADOS_PLURINOMINALES
+    )
+    
+    # Simular escaños uninominales
+    diputados_uninominales_por_depto = simular_escanos_uninominales(
+        prediccion_votos, CIRCUNSCRIPCIONES_UNINOMINALES
+    )
+    
+    # Sumar escaños uninominales totales por partido
+    diputados_uninominales = defaultdict(int)
+    for depto_escanos in diputados_uninominales_por_depto.values():
+        for partido, escanos in depto_escanos.items():
+            diputados_uninominales[partido] += escanos
+    
+    # Combinar escaños uninominales y plurinominales
+    diputados_totales = defaultdict(int)
+    for partido in set(diputados_plurinominales.keys()) | set(diputados_uninominales.keys()):
+        diputados_totales[partido] = (
+            diputados_plurinominales.get(partido, 0) + 
+            diputados_uninominales.get(partido, 0)
+        )
+    
     # Calcular escaños para Senadores (método D'Hondt)
-    senadores = calcular_dhondt(votos_normalizados, total_senadores)
+    senadores = calcular_escanos_plurinominales(
+        prediccion_votos, umbral_minimo, total_senadores
+    )
 
-    # Calcular escaños para Diputados (método D'Hondt)
-    diputados = calcular_dhondt(votos_normalizados, total_diputados)
+    return dict(senadores), dict(diputados_totales)
 
-    return senadores, diputados
+
+def obtener_detalle_escanos(prediccion_votos: Dict[str, float], umbral_minimo: float) -> Dict[str, Any]:
+    """
+    Obtiene el detalle completo de la distribución de escaños.
+    
+    Args:
+        prediccion_votos: Diccionario con la predicción de votos por partido
+        umbral_minimo: Umbral mínimo de votos para obtener escaños
+        
+    Returns:
+        Dict con el detalle completo de escaños
+    """
+    # Calcular escaños plurinominales
+    diputados_plurinominales = calcular_escanos_plurinominales(
+        prediccion_votos, umbral_minimo, DIPUTADOS_PLURINOMINALES
+    )
+    
+    # Simular escaños uninominales por departamento
+    diputados_uninominales_por_depto = simular_escanos_uninominales(
+        prediccion_votos, CIRCUNSCRIPCIONES_UNINOMINALES
+    )
+    
+    # Sumar escaños uninominales totales
+    diputados_uninominales = defaultdict(int)
+    for depto_escanos in diputados_uninominales_por_depto.values():
+        for partido, escanos in depto_escanos.items():
+            diputados_uninominales[partido] += escanos
+    
+    # Calcular senadores (lista nacional)
+    senadores = calcular_escanos_plurinominales(
+        prediccion_votos, umbral_minimo, len(DEPARTAMENTOS_BOLIVIA) * SENADORES_POR_DEPARTAMENTO
+    )
+    
+    # Simular senadores por departamento
+    senadores_por_depto = simular_senadores_por_departamento(prediccion_votos)
+    
+    return {
+        'diputados_plurinominales': dict(diputados_plurinominales),
+        'diputados_uninominales': dict(diputados_uninominales),
+        'diputados_uninominales_por_depto': diputados_uninominales_por_depto,
+        'senadores': dict(senadores),
+        'senadores_por_depto': senadores_por_depto,
+        'total_diputados': {
+            partido: diputados_plurinominales.get(partido, 0) + diputados_uninominales.get(partido, 0)
+            for partido in set(diputados_plurinominales.keys()) | set(diputados_uninominales.keys())
+        }
+    }
 
 
 def simular_segunda_vuelta(prediccion_2025: Dict[str, float], 
@@ -130,4 +290,64 @@ def simular_segunda_vuelta(prediccion_2025: Dict[str, float],
         candidatos_segunda_vuelta[1]: votos_segundo_lugar
     }
     
-    return prediccion_segunda_vuelta 
+    return prediccion_segunda_vuelta
+
+
+def simular_senadores_por_departamento(prediccion_votos: Dict[str, float]) -> Dict[str, Dict[str, int]]:
+    """
+    Simula la distribución de senadores por departamento.
+    Cada departamento tiene 4 senadores que pueden ser de diferentes partidos.
+    
+    Args:
+        prediccion_votos: Diccionario con la predicción de votos por partido
+        
+    Returns:
+        Dict[str, Dict[str, int]]: Diccionario con senadores por departamento y partido
+    """
+    senadores_por_depto = {}
+    
+    # Ordenar partidos por fuerza electoral
+    partidos_ordenados = sorted(prediccion_votos.items(), key=lambda x: x[1], reverse=True)
+    
+    for departamento in DEPARTAMENTOS_BOLIVIA:
+        senadores_departamento = {}
+        
+        # Distribuir 4 senadores por departamento
+        for i, (partido, porcentaje) in enumerate(partidos_ordenados):
+            if i >= 4:  # Máximo 4 partidos por departamento
+                break
+                
+            # Simular variación regional para senadores
+            variacion_regional = 1.0
+            
+            # Patrones regionales para senadores (similar a diputados pero más equilibrado)
+            if departamento in ['La Paz', 'Cochabamba'] and partido in ['MAS', 'ALIANZA UNIDAD']:
+                variacion_regional = 1.1
+            elif departamento in ['Santa Cruz', 'Tarija'] and partido in ['LIBRE', 'APB-SÚMATE']:
+                variacion_regional = 1.2
+            elif departamento in ['Oruro', 'Potosí'] and partido in ['MAS', 'ALIANZA POPULAR']:
+                variacion_regional = 1.05
+            
+            # Calcular senadores asignados
+            senadores_asignados = max(1, int((porcentaje / 100) * 4 * variacion_regional))
+            
+            # Asegurar que no se exceda el número de senadores disponibles
+            senadores_disponibles = 4 - sum(senadores_departamento.values())
+            if senadores_disponibles > 0:
+                senadores_finales = min(senadores_asignados, senadores_disponibles)
+                if senadores_finales > 0:
+                    senadores_departamento[partido] = senadores_finales
+        
+        # Si quedan senadores sin asignar, distribuirlos
+        senadores_restantes = 4 - sum(senadores_departamento.values())
+        if senadores_restantes > 0:
+            for partido, _ in partidos_ordenados:
+                if senadores_restantes <= 0:
+                    break
+                if partido not in senadores_departamento:
+                    senadores_departamento[partido] = 1
+                    senadores_restantes -= 1
+        
+        senadores_por_depto[departamento] = senadores_departamento
+    
+    return senadores_por_depto

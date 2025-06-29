@@ -7,9 +7,33 @@ Este es un simulador electoral que permite visualizar y analizar los resultados 
 - Visualización de resultados históricos de las elecciones 2020
 - Simulación de nuevos escenarios electorales
 - Cálculo automático de escaños (Senadores y Diputados) usando el método D'Hondt
+- **NUEVO**: Especificación de escaños uninominales y plurinominales según la Ley 026
+- **NUEVO**: Distribución territorial de escaños por departamento
+- **NUEVO**: Vista detallada de distribución de escaños
 - Gráficos interactivos de resultados
 - Simulación de segunda vuelta cuando es necesario
-- Interfaz gráfica intuitiva con Tkinter
+- Interfaz gráfica intuitiva con CustomTkinter
+- Temática boliviana con colores patrios
+
+## 🆕 **Nuevas Funcionalidades - Escaños Uninominales y Plurinominales**
+
+### Implementación según la Ley 026 de Bolivia
+
+El sistema ahora incluye una implementación completa que diferencia entre:
+
+#### **Diputados (130 totales)**
+- **60 Diputados Plurinominales**: Lista nacional, método D'Hondt
+- **70 Diputados Uninominales**: Circunscripciones departamentales
+
+#### **Senadores (36 totales)**
+- 4 senadores por departamento
+- Asignación por lista nacional
+
+#### **Nueva Vista: "Detalle de Escaños"**
+- Distribución detallada por tipo de escaño
+- Análisis territorial por departamento
+- Gráficos y tablas comparativas
+- Resumen parlamentario completo
 
 ## Requisitos
 
@@ -17,10 +41,12 @@ Para ejecutar este proyecto, necesitas tener instalado:
 
 - Python 3.6 o superior
 - Las siguientes bibliotecas de Python:
-  - tkinter (incluido en la instalación estándar de Python)
+  - customtkinter
   - matplotlib
   - pandas
   - openpyxl
+  - numpy
+  - pillow
 
 ## Instalación
 
@@ -63,19 +89,24 @@ pip install -r requirements.txt
 Para ejecutar el simulador, simplemente ejecuta el archivo principal:
 
 ```bash
-python src/app.py
+python src/main.py
 ```
 
 ## Uso
 
-1. Al iniciar la aplicación, verás la pestaña "Resultados Históricos" que muestra los datos de las elecciones 2020
-2. Puedes agregar nuevos partidos políticos usando el campo de texto y el botón "Agregar"
-3. Haz clic en "Mostrar Resultados Históricos" para ver los gráficos y análisis
-4. La aplicación mostrará:
-   - Distribución general de votos
-   - Distribución de senadores
-   - Distribución de diputados
-   - Resumen detallado de resultados
+1. **Introducción**: Información general sobre las elecciones 2025
+2. **Datos Históricos y Encuestas**: Cargar y visualizar datos electorales
+3. **Configuración del Modelo**: Ajustar parámetros de predicción
+4. **Resultados de Predicción**: Ver resultados generales
+5. **🆕 Detalle de Escaños**: Análisis detallado de distribución de escaños
+6. **Exportar Resultados**: Generar reportes y gráficos
+
+### Nuevas Funcionalidades de Escaños
+
+- **Vista Detallada**: Nueva pestaña "Detalle de Escaños" con análisis completo
+- **Distribución Territorial**: Escaños uninominales por departamento
+- **Análisis Comparativo**: Comparación entre tipos de representación
+- **Visualizaciones Avanzadas**: Gráficos específicos por tipo de escaño
 
 ## Notas
 
@@ -83,6 +114,8 @@ python src/app.py
 - Se aplica un umbral mínimo del 3% para la representación parlamentaria
 - Los nuevos partidos agregados reciben un porcentaje aleatorio entre 0% y 10%
 - Se simula una segunda vuelta cuando ningún partido obtiene más del 50% de los votos
+- **NUEVO**: Implementación completa de la Ley 026 de Bolivia
+- **NUEVO**: Distribución realista de escaños uninominales por departamento
 
 ## Estructura del Proyecto
 
@@ -90,10 +123,38 @@ python src/app.py
 .
 ├── README.md
 ├── requirements.txt
+├── FUNCIONALIDADES_ESCANOS.md
 └── src/
-    └── app.py
+    ├── main.py
+    ├── controllers/
+    │   └── main_controller.py
+    ├── models/
+    │   └── electoral_model.py
+    ├── views/
+    │   ├── introduccion_view.py
+    │   ├── datos_view.py
+    │   ├── modelo_view.py
+    │   ├── resultados_view.py
+    │   ├── exportacion_view.py
+    │   └── detalle_escanos_view.py
+    ├── utils/
+    │   ├── electoral_utils.py
+    │   ├── chart_utils.py
+    │   └── style_utils.py
+    └── config/
+        ├── settings.py
+        └── bolivian_theme.py
 ```
+
+## Documentación Adicional
+
+Para más detalles sobre las nuevas funcionalidades de escaños, consulta:
+- [FUNCIONALIDADES_ESCANOS.md](FUNCIONALIDADES_ESCANOS.md)
 
 ## Contribuciones
 
 Las contribuciones son bienvenidas. Por favor, abre un issue para discutir los cambios propuestos.
+
+## Créditos
+
+Desarrollado para el Taller de Simulación de Sistemas de la Universidad Mayor de San Simón, Bolivia.

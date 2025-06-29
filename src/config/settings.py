@@ -11,6 +11,36 @@ TOTAL_SENADORES = 36
 TOTAL_DIPUTADOS = 130
 UMBRAL_MINIMO_DEFAULT = 0.03
 
+# Configuración de escaños según Ley 026 de Bolivia
+# Diputados: 130 totales
+DIPUTADOS_UNINOMINALES = 70  # 70 escaños uninominales (por circunscripción)
+DIPUTADOS_PLURINOMINALES = 60  # 60 escaños plurinominales (lista nacional)
+
+# Senadores: 36 totales (4 por departamento)
+SENADORES_POR_DEPARTAMENTO = 4
+DEPARTAMENTOS_BOLIVIA = [
+    'La Paz', 'Cochabamba', 'Santa Cruz', 'Oruro', 
+    'Potosí', 'Chuquisaca', 'Tarija', 'Beni', 'Pando'
+]
+
+# Configuración de circunscripciones uninominales (ejemplo simplificado)
+CIRCUNSCRIPCIONES_UNINOMINALES = {
+    'La Paz': 20,
+    'Cochabamba': 14,
+    'Santa Cruz': 18,
+    'Oruro': 4,
+    'Potosí': 5,
+    'Chuquisaca': 4,
+    'Tarija': 3,
+    'Beni': 1,
+    'Pando': 1
+}
+
+# Verificación de que los números coincidan
+assert sum(CIRCUNSCRIPCIONES_UNINOMINALES.values()) == DIPUTADOS_UNINOMINALES, "Los escaños uninominales deben sumar 70"
+assert len(DEPARTAMENTOS_BOLIVIA) * SENADORES_POR_DEPARTAMENTO == TOTAL_SENADORES, "Los senadores deben ser 36 (4 por departamento)"
+assert DIPUTADOS_UNINOMINALES + DIPUTADOS_PLURINOMINALES == TOTAL_DIPUTADOS, "Los diputados deben sumar 130"
+
 # Variables del modelo predictivo por defecto
 PESO_HISTORICO_DEFAULT = 0.4
 PESO_ENCUESTAS_DEFAULT = 0.6

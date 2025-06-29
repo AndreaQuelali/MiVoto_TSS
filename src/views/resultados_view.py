@@ -1,13 +1,17 @@
 """
-Vista para mostrar los resultados de la predicción
+Vista para mostrar los resultados de la predicción electoral
 """
 import customtkinter as ctk
-from tkinter import messagebox
-from typing import Dict, Callable
+from tkinter import messagebox, ttk
+from typing import Dict, Callable, List
+import matplotlib.pyplot as plt
+from matplotlib.backends.backend_tkagg import FigureCanvasTkAgg
+import numpy as np
 
 from utils.chart_utils import crear_grafico_votos, crear_grafico_escanos
 from utils.logo_utils import logo_manager
-from config.settings import TOTAL_SENADORES, TOTAL_DIPUTADOS
+from utils.style_utils import aplicar_estilo_grafico
+from config.settings import TOTAL_SENADORES, TOTAL_DIPUTADOS, DEPARTAMENTOS_BOLIVIA
 from config.bolivian_theme import (
     BOLIVIA_RED, BOLIVIA_GREEN, BOLIVIA_YELLOW, BOLIVIA_BG_WARM,
     BOLIVIA_TEXT_DARK, BOLIVIA_DARK_GREEN, BOLIVIA_GOLD,
@@ -132,6 +136,14 @@ class ResultadosView:
     def mostrar_resultados(self):
         """Muestra los resultados de la predicción."""
         if not self.prediccion_ejecutada:
+            # Limpiar contenido existente de los frames
+            for widget in self.frame_votos.winfo_children():
+                widget.destroy()
+            for widget in self.frame_senadores.winfo_children():
+                widget.destroy()
+            for widget in self.frame_diputados.winfo_children():
+                widget.destroy()
+            
             no_results_label = ctk.CTkLabel(
                 self.frame_votos, 
                 text="Ejecute el modelo en la pestaña 'Configuración del Modelo' para ver los resultados.",
@@ -149,13 +161,18 @@ class ResultadosView:
 
         # Limpiar widgets existentes
         self._limpiar_widgets()
+        
+        # Limpiar contenido existente de los frames
+        for widget in self.frame_votos.winfo_children():
+            widget.destroy()
+        for widget in self.frame_senadores.winfo_children():
+            widget.destroy()
+        for widget in self.frame_diputados.winfo_children():
+            widget.destroy()
 
-        self._crear_tabla_votos()
-        self._crear_grafico_votos()
-        self._crear_tabla_escanos(self.frame_senadores, self.senadores)
-        self._crear_grafico_escanos(self.frame_senadores, self.senadores, "Senadores")
-        self._crear_tabla_escanos(self.frame_diputados, self.diputados)
-        self._crear_grafico_escanos(self.frame_diputados, self.diputados, "Diputados")
+        self._crear_seccion_votos(self.frame_votos, self.prediccion_votos)
+        self._crear_seccion_senadores(self.frame_senadores, self.senadores)
+        self._crear_seccion_diputados(self.frame_diputados, self.diputados)
     
     def _limpiar_widgets(self):
         """Limpia los widgets existentes."""
@@ -259,17 +276,239 @@ class ResultadosView:
         if self.on_simular_segunda_vuelta:
             self.on_simular_segunda_vuelta()
     
-    def actualizar_resultados(self, prediccion_votos: Dict, senadores: Dict, diputados: Dict,
-                            segunda_vuelta: bool, candidatos_segunda_vuelta: list):
-        """Actualiza los resultados mostrados en la vista."""
+    def actualizar_resultados(self, prediccion_votos: Dict[str, float], 
+                             senadores: Dict[str, int], diputados: Dict[str, int],
+                             segunda_vuelta: bool, candidatos_segunda_vuelta: List[str],
+                             diputados_plurinominales: Dict[str, int] = None,
+                             diputados_uninominales: Dict[str, int] = None,
+                             diputados_uninominales_por_depto: Dict[str, Dict[str, int]] = None):
+        """
+        Actualiza los resultados mostrados en la vista.
+        
+        Args:
+            prediccion_votos: Predicción de votos por partido
+            senadores: Distribución de senadores por partido
+            diputados: Distribución total de diputados por partido
+            segunda_vuelta: Si se requiere segunda vuelta
+            candidatos_segunda_vuelta: Lista de candidatos para segunda vuelta
+            diputados_plurinominales: Distribución de diputados plurinominales
+            diputados_uninominales: Distribución de diputados uninominales
+            diputados_uninominales_por_depto: Distribución de diputados uninominales por departamento
+        """
+        # Actualizar variables de instancia
         self.prediccion_votos = prediccion_votos
         self.senadores = senadores
         self.diputados = diputados
         self.segunda_vuelta = segunda_vuelta
         self.candidatos_segunda_vuelta = candidatos_segunda_vuelta
         self.prediccion_ejecutada = True
+        
+        # Mostrar los resultados
         self.mostrar_resultados()
     
     def obtener_frame(self):
         """Retorna el frame de la vista."""
         return self.frame 
+    
+    def _crear_seccion_votos(self, parent, prediccion_votos):
+        """Crea la sección de predicción de votos."""
+        seccion = ctk.CTkFrame(parent, fg_color=BOLIVIA_BG_CONTAINER)
+        seccion.pack(fill="x", padx=10, pady=5)
+        
+        titulo = ctk.CTkLabel(seccion, text="PREDICCIÓN DE VOTOS 2025", 
+                             font=ctk.CTkFont(size=16, weight="bold"),
+                             text_color=BOLIVIA_RED)
+        titulo.pack(pady=10)
+        
+        # Crear gráfico de votos
+        self.canvas_votos = crear_grafico_votos(prediccion_votos, seccion)
+        
+        # Crear tabla de votos
+        self._crear_tabla_votos(seccion, prediccion_votos)
+    
+    def _crear_seccion_senadores(self, parent, senadores):
+        """Crea la sección de distribución de senadores."""
+        seccion = ctk.CTkFrame(parent, fg_color=BOLIVIA_BG_CONTAINER)
+        seccion.pack(fill="x", padx=10, pady=5)
+        
+        titulo = ctk.CTkLabel(seccion, text=f"DISTRIBUCIÓN DE SENADORES (Total: {TOTAL_SENADORES})", 
+                             font=ctk.CTkFont(size=16, weight="bold"),
+                             text_color=BOLIVIA_DARK_GREEN)
+        titulo.pack(pady=10)
+        
+        # Crear gráfico de senadores
+        self.canvas_senadores = crear_grafico_escanos(senadores, seccion, "Senadores")
+        
+        # Crear tabla de senadores
+        self._crear_tabla_escanos(seccion, senadores, "Senadores")
+    
+    def _crear_seccion_diputados(self, parent, diputados):
+        """Crea la sección de distribución total de diputados."""
+        seccion = ctk.CTkFrame(parent, fg_color=BOLIVIA_BG_CONTAINER)
+        seccion.pack(fill="x", padx=10, pady=5)
+        
+        titulo = ctk.CTkLabel(seccion, text=f"DISTRIBUCIÓN TOTAL DE DIPUTADOS (Total: {TOTAL_DIPUTADOS})", 
+                             font=ctk.CTkFont(size=16, weight="bold"),
+                             text_color=BOLIVIA_DARK_GREEN)
+        titulo.pack(pady=10)
+        
+        # Crear gráfico de diputados
+        self.canvas_diputados = crear_grafico_escanos(diputados, seccion, "Diputados")
+        
+        # Crear tabla de diputados
+        self._crear_tabla_escanos(seccion, diputados, "Diputados")
+    
+    def _crear_seccion_diputados_plurinominales(self, parent, diputados_plurinominales):
+        """Crea la sección de diputados plurinominales."""
+        seccion = ctk.CTkFrame(parent, fg_color=BOLIVIA_BG_CONTAINER)
+        seccion.pack(fill="x", padx=10, pady=5)
+        
+        titulo = ctk.CTkLabel(seccion, text="DIPUTADOS PLURINOMINALES (Lista Nacional - 60 escaños)", 
+                             font=ctk.CTkFont(size=14, weight="bold"),
+                             text_color=BOLIVIA_GOLD)
+        titulo.pack(pady=10)
+        
+        # Crear tabla de diputados plurinominales
+        self._crear_tabla_escanos(seccion, diputados_plurinominales, "Diputados Plurinominales")
+    
+    def _crear_seccion_diputados_uninominales(self, parent, diputados_uninominales):
+        """Crea la sección de diputados uninominales."""
+        seccion = ctk.CTkFrame(parent, fg_color=BOLIVIA_BG_CONTAINER)
+        seccion.pack(fill="x", padx=10, pady=5)
+        
+        titulo = ctk.CTkLabel(seccion, text="DIPUTADOS UNINOMINALES (Circunscripciones - 70 escaños)", 
+                             font=ctk.CTkFont(size=14, weight="bold"),
+                             text_color=BOLIVIA_GOLD)
+        titulo.pack(pady=10)
+        
+        # Crear tabla de diputados uninominales
+        self._crear_tabla_escanos(seccion, diputados_uninominales, "Diputados Uninominales")
+    
+    def _crear_seccion_diputados_por_depto(self, parent, diputados_uninominales_por_depto):
+        """Crea la sección de diputados uninominales por departamento."""
+        seccion = ctk.CTkFrame(parent, fg_color=BOLIVIA_BG_CONTAINER)
+        seccion.pack(fill="x", padx=10, pady=5)
+        
+        titulo = ctk.CTkLabel(seccion, text="DIPUTADOS UNINOMINALES POR DEPARTAMENTO", 
+                             font=ctk.CTkFont(size=14, weight="bold"),
+                             text_color=BOLIVIA_GOLD)
+        titulo.pack(pady=10)
+        
+        # Crear tabla de diputados por departamento
+        self._crear_tabla_diputados_por_depto(seccion, diputados_uninominales_por_depto)
+    
+    def _crear_seccion_segunda_vuelta(self, parent, candidatos_segunda_vuelta):
+        """Crea la sección de segunda vuelta."""
+        seccion = ctk.CTkFrame(parent, fg_color=BOLIVIA_BG_CONTAINER)
+        seccion.pack(fill="x", padx=10, pady=5)
+        
+        titulo = ctk.CTkLabel(seccion, text="SEGUNDA VUELTA REQUERIDA", 
+                             font=ctk.CTkFont(size=16, weight="bold"),
+                             text_color=BOLIVIA_RED)
+        titulo.pack(pady=10)
+        
+        info = ctk.CTkLabel(seccion, 
+                           text=f"Los candidatos que pasan a segunda vuelta son:\n{candidatos_segunda_vuelta[0]} y {candidatos_segunda_vuelta[1]}",
+                           font=ctk.CTkFont(size=12),
+                           text_color=BOLIVIA_TEXT_DARK)
+        info.pack(pady=10)
+    
+    def _crear_boton_segunda_vuelta(self, parent):
+        """Crea el botón para simular segunda vuelta."""
+        boton_frame = ctk.CTkFrame(parent, fg_color=BOLIVIA_BG_WARM)
+        boton_frame.pack(fill="x", padx=10, pady=10)
+        
+        boton = ctk.CTkButton(boton_frame, 
+                             text="Simular Segunda Vuelta",
+                             command=self.on_simular_segunda_vuelta,
+                             fg_color=BOLIVIA_RED,
+                             hover_color=BOLIVIA_DARK_GREEN,
+                             font=ctk.CTkFont(size=14, weight="bold"))
+        boton.pack(pady=10)
+    
+    def _crear_tabla_votos(self, parent, prediccion_votos):
+        """Crea la tabla de votos."""
+        # Frame para la tabla
+        tabla_frame = ctk.CTkFrame(parent, fg_color=BOLIVIA_BG_WARM)
+        tabla_frame.pack(fill="x", padx=20, pady=10)
+        
+        # Crear Treeview
+        columns = ('Partido', 'Porcentaje')
+        self.tree_votos = ttk.Treeview(tabla_frame, columns=columns, show='headings', height=6)
+        
+        # Configurar columnas
+        self.tree_votos.heading('Partido', text='Partido Político')
+        self.tree_votos.heading('Porcentaje', text='Porcentaje (%)')
+        self.tree_votos.column('Partido', width=200)
+        self.tree_votos.column('Porcentaje', width=100)
+        
+        # Insertar datos
+        for partido, porcentaje in sorted(prediccion_votos.items(), key=lambda x: x[1], reverse=True):
+            self.tree_votos.insert('', 'end', values=(partido, f'{porcentaje:.2f}%'))
+        
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(tabla_frame, orient="vertical", command=self.tree_votos.yview)
+        self.tree_votos.configure(yscrollcommand=scrollbar.set)
+        
+        # Empaquetar
+        self.tree_votos.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+    
+    def _crear_tabla_escanos(self, parent, escanos, tipo):
+        """Crea la tabla de escaños."""
+        # Frame para la tabla
+        tabla_frame = ctk.CTkFrame(parent, fg_color=BOLIVIA_BG_WARM)
+        tabla_frame.pack(fill="x", padx=20, pady=10)
+        
+        # Crear Treeview
+        columns = ('Partido', 'Escaños')
+        tree = ttk.Treeview(tabla_frame, columns=columns, show='headings', height=6)
+        
+        # Configurar columnas
+        tree.heading('Partido', text='Partido Político')
+        tree.heading('Escaños', text=f'{tipo}')
+        tree.column('Partido', width=200)
+        tree.column('Escaños', width=100)
+        
+        # Insertar datos
+        for partido, num_escanos in sorted(escanos.items(), key=lambda x: x[1], reverse=True):
+            tree.insert('', 'end', values=(partido, num_escanos))
+        
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(tabla_frame, orient="vertical", command=tree.yview)
+        tree.configure(yscrollcommand=scrollbar.set)
+        
+        # Empaquetar
+        tree.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")
+    
+    def _crear_tabla_diputados_por_depto(self, parent, diputados_por_depto):
+        """Crea la tabla de diputados por departamento."""
+        # Frame para la tabla
+        tabla_frame = ctk.CTkFrame(parent, fg_color=BOLIVIA_BG_WARM)
+        tabla_frame.pack(fill="x", padx=20, pady=10)
+        
+        # Crear Treeview
+        columns = ('Departamento', 'Partido', 'Escaños')
+        tree = ttk.Treeview(tabla_frame, columns=columns, show='headings', height=8)
+        
+        # Configurar columnas
+        tree.heading('Departamento', text='Departamento')
+        tree.heading('Partido', text='Partido Político')
+        tree.heading('Escaños', text='Escaños')
+        tree.column('Departamento', width=150)
+        tree.column('Partido', width=200)
+        tree.column('Escaños', width=100)
+        
+        # Insertar datos
+        for departamento, partidos in diputados_por_depto.items():
+            for partido, escanos in partidos.items():
+                tree.insert('', 'end', values=(departamento, partido, escanos))
+        
+        # Scrollbar
+        scrollbar = ttk.Scrollbar(tabla_frame, orient="vertical", command=tree.yview)
+        tree.configure(yscrollcommand=scrollbar.set)
+        
+        # Empaquetar
+        tree.pack(side="left", fill="both", expand=True)
+        scrollbar.pack(side="right", fill="y")

@@ -3,6 +3,7 @@ Utilidades para configuración de estilos de la interfaz gráfica
 """
 import tkinter as tk
 from tkinter import ttk
+import matplotlib.pyplot as plt
 from config.settings import PRIMARY_COLOR, SECONDARY_COLOR, ACCENT_COLOR, BG_COLOR, TEXT_COLOR
 
 
@@ -82,4 +83,33 @@ def crear_scrollable_frame(parent):
     canvas.pack(side="left", fill="both", expand=True)
     scrollbar.pack(side="right", fill="y")
     
-    return canvas, scrollbar, scrollable_frame 
+    return canvas, scrollbar, scrollable_frame
+
+
+def aplicar_estilo_grafico(fig, ax):
+    """
+    Aplica estilos consistentes a los gráficos de matplotlib.
+    
+    Args:
+        fig: Figura de matplotlib
+        ax: Ejes de matplotlib
+    """
+    # Configurar colores de fondo
+    fig.patch.set_facecolor('#f8f9fa')
+    ax.set_facecolor('#ffffff')
+    
+    # Configurar colores de texto
+    ax.tick_params(colors='#333333')
+    ax.xaxis.label.set_color('#333333')
+    ax.yaxis.label.set_color('#333333')
+    ax.title.set_color('#333333')
+    
+    # Configurar grid
+    ax.grid(True, linestyle='--', alpha=0.7, color='#cccccc')
+    
+    # Configurar bordes
+    for spine in ax.spines.values():
+        spine.set_color('#cccccc')
+    
+    # Ajustar layout
+    fig.tight_layout()
