@@ -78,8 +78,8 @@ class ModeloPredictivoElectoral:
             
         datos_historicos_recientes = self.datos_historicos[str(ultimos_años_historicos_keys[0])]
         
-        # Obtener todos los partidos únicos
-        all_parties = set(datos_historicos_recientes.keys()).union(*[e.keys() for e in self.encuestas_2025.values()])
+        # Obtener todos los partidos únicos SOLO de las encuestas
+        all_parties = set().union(*[e.keys() for e in self.encuestas_2025.values()])
         
         # Calcular promedios de encuestas
         promedios_encuestas_2025 = {}

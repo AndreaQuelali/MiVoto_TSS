@@ -168,18 +168,18 @@ class DatosView:
         # --- DRAG TO SCROLL ---
         self._add_drag_to_scroll(self.tree_historicos)
 
-        # Crear encabezados
+        # Crear encabezados (históricos)
         header = "Año".ljust(8)
         for party in all_parties:
-            header += f"{party}".ljust(12)
+            header += f"{party}".ljust(24)
         self.tree_historicos.insert("1.0", header + "\n")
         self.tree_historicos.insert("end", "=" * len(header) + "\n")
 
-        # Insertar datos
+        # Insertar datos (históricos)
         for idx, (year, data) in enumerate(sorted(self.datos_historicos.items())):
             row = f"{year}".ljust(8)
             for party in all_parties:
-                row += f"{data.get(party, 0):.1f}%".ljust(12)
+                row += f"{data.get(party, 0):.1f}%".ljust(24)
             self.tree_historicos.insert("end", row + "\n")
             self.tree_historicos.insert("end", "-" * len(header) + "\n")
 
@@ -221,18 +221,18 @@ class DatosView:
         # --- DRAG TO SCROLL ---
         self._add_drag_to_scroll(self.tree_encuestas)
 
-        # Crear encabezados
+        # Crear encabezados (encuestas)
         header = "Encuesta".ljust(15)
         for party in all_parties:
-            header += f"{party}".ljust(12)
+            header += f"{party}".ljust(24)
         self.tree_encuestas.insert("1.0", header + "\n")
         self.tree_encuestas.insert("end", "=" * len(header) + "\n")
 
-        # Insertar datos
+        # Insertar datos (encuestas)
         for idx, (survey_name, data) in enumerate(self.encuestas_2025.items()):
             row = f"{survey_name}".ljust(15)
             for party in all_parties:
-                row += f"{data.get(party, 0):.1f}%".ljust(12)
+                row += f"{data.get(party, 0):.1f}%".ljust(24)
             self.tree_encuestas.insert("end", row + "\n")
             self.tree_encuestas.insert("end", "-" * len(header) + "\n")
 

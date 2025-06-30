@@ -13,6 +13,7 @@ from views.resultados_view import ResultadosView
 from views.exportacion_view import ExportacionView
 from views.detalle_escanos_view import DetalleEscanosView
 from views.partidos_view import PartidosView
+from views.reportes_view import ReportesView
 from config.settings import (WINDOW_TITLE, WINDOW_SIZE, DATOS_HISTORICOS_DEFAULT, 
                               ENCUESTAS_2025_DEFAULT, TOTAL_SENADORES, TOTAL_DIPUTADOS)
 from config.bolivian_theme import (
@@ -50,6 +51,7 @@ class MainController:
         self.exportacion_view = None
         self.detalle_escanos_view = None
         self.partidos_view = None
+        self.reportes_view = None
         
         # Inicializar interfaz
         self.inicializar_interfaz()
@@ -119,6 +121,16 @@ class MainController:
         partidos_tab = self.tabview.tab("Partidos y Postulantes")
         self.partidos_view = PartidosView(partidos_tab)
         self.partidos_view.obtener_frame().pack(fill="both", expand=True)
+
+        # Reportes
+        self.tabview.add("Reportes")
+        reportes_tab = self.tabview.tab("Reportes")
+        self.reportes_view = ReportesView(
+            reportes_tab,
+            self.get_lista_partidos(),
+            self.get_datos_filtrados_por_partido
+        )
+        self.reportes_view.obtener_frame().pack(fill="both", expand=True)
 
         # Exportar Resultados (movido al final)
         self.tabview.add("Exportar Resultados")
@@ -230,3 +242,29 @@ class MainController:
     def ejecutar(self):
         """Ejecuta la aplicación."""
         self.root.mainloop() 
+    
+    def get_lista_partidos(self):
+        # Solo partidos presentes en las encuestas actuales
+        if self.modelo.encuestas_2025:
+            partidos = set()
+            for e in self.modelo.encuestas_2025.values():
+                partidos.update(e.keys())
+            return list(partidos)
+        else:
+            return []
+
+    def get_datos_filtrados_por_partido(self, partido):
+        # Devuelve los datos relevantes del partido seleccionado
+        datos = {}
+        if self.modelo.prediccion_2025 and partido in self.modelo.prediccion_2025:
+            datos['Predicción de votos (%)'] = round(self.modelo.prediccion_2025[partido], 2)
+        if self.modelo.senadores_2025 and partido in self.modelo.senadores_2025:
+            datos['Senadores'] = self.modelo.senadores_2025[partido]
+        if self.modelo.diputados_2025 and partido in self.modelo.diputados_2025:
+            datos['Diputados'] = self.modelo.diputados_2025[partido]
+        # Agregar escaños por departamento
+        if self.modelo.diputados_uninominales_por_depto_2025:
+            for depto, partidos in self.modelo.diputados_uninominales_por_depto_2025.items():
+                if partido in partidos:
+                    datos[f"Diputados uninominales en {depto}"] = partidos[partido]
+        return datos
