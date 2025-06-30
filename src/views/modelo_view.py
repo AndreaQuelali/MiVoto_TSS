@@ -65,6 +65,17 @@ class ModeloView:
         )
         titulo_label.pack(pady=(0, 24))
 
+        # Mensaje explicativo
+        explicacion = ctk.CTkLabel(
+            contenedor,
+            text="Ajusta los parámetros del modelo predictivo según tu criterio. Puedes modificar la ponderación entre datos históricos y encuestas, el margen de error, la tendencia y el umbral mínimo de votos para asignación de escaños.",
+            font=ctk.CTkFont(size=13),
+            text_color=BOLIVIA_TEXT_DARK,
+            wraplength=800,
+            justify="center"
+        )
+        explicacion.pack(pady=(0, 18))
+
         # Frame de ponderación
         frame_ponderacion = ctk.CTkFrame(contenedor, fg_color=BOLIVIA_BG_FRAME)
         frame_ponderacion.pack(fill='x', padx=10, pady=12)

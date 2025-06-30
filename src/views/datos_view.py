@@ -59,6 +59,17 @@ class DatosView:
         )
         titulo_label.pack(pady=(0, 24))
 
+        # Mensaje explicativo
+        explicacion = ctk.CTkLabel(
+            contenedor,
+            text="En esta sección puedes consultar y cargar los resultados históricos de elecciones y las encuestas actuales. Los datos históricos abarcan desde el año más antiguo disponible hasta el más reciente cargado. Las encuestas reflejan la intención de voto para las próximas elecciones.",
+            font=ctk.CTkFont(size=13),
+            text_color=BOLIVIA_TEXT_DARK,
+            wraplength=800,
+            justify="center"
+        )
+        explicacion.pack(pady=(0, 18))
+
         # Scrollable frame para el contenido de datos
         self.scrollable_frame = ctk.CTkScrollableFrame(contenedor, width=800, height=500, fg_color=BOLIVIA_BG_WARM)
         self.scrollable_frame.pack(fill='both', expand=True, padx=0, pady=0)

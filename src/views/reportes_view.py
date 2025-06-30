@@ -24,6 +24,17 @@ class ReportesView:
         )
         titulo.pack(pady=(20, 10))
 
+        # Mensaje explicativo
+        explicacion = ctk.CTkLabel(
+            self.frame,
+            text="Filtra la información por partido para ver sus resultados y escaños obtenidos, incluyendo el detalle por departamento.",
+            font=ctk.CTkFont(size=13),
+            text_color=BOLIVIA_TEXT_DARK,
+            wraplength=800,
+            justify="center"
+        )
+        explicacion.pack(pady=(0, 18))
+
         descripcion = ctk.CTkLabel(
             self.frame,
             text="Selecciona un partido para ver su información detallada",

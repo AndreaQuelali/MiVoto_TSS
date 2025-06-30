@@ -105,6 +105,17 @@ class PartidosView:
         )
         titulo.pack(pady=(20, 10))
         
+        # Mensaje explicativo
+        explicacion = ctk.CTkLabel(
+            self.frame,
+            text="Consulta la información básica de los partidos políticos y sus principales candidatos para las elecciones generales 2025.",
+            font=ctk.CTkFont(size=13),
+            text_color=BOLIVIA_TEXT_DARK,
+            wraplength=800,
+            justify="center"
+        )
+        explicacion.pack(pady=(0, 18))
+        
         # Descripción
         descripcion = ctk.CTkLabel(
             self.frame,
