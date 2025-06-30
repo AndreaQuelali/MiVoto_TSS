@@ -1,5 +1,7 @@
 # Simulador Electoral Bolivia 2025
 
+[Repositorio en GitHub](https://github.com/AndreaQuelali/MiVoto_TSS.git)
+
 Este es un simulador electoral que permite visualizar y analizar los resultados de las elecciones bolivianas, basándose en datos históricos de 2020 y permitiendo la simulación de nuevos escenarios.
 
 ## Características
@@ -7,15 +9,13 @@ Este es un simulador electoral que permite visualizar y analizar los resultados 
 - Visualización de resultados históricos de las elecciones 2020
 - Simulación de nuevos escenarios electorales
 - Cálculo automático de escaños (Senadores y Diputados) usando el método D'Hondt
-- **NUEVO**: Especificación de escaños uninominales y plurinominales según la Ley 026
-- **NUEVO**: Distribución territorial de escaños por departamento
-- **NUEVO**: Vista detallada de distribución de escaños
+- Especificación de escaños uninominales y plurinominales según la Ley 026
+- Distribución territorial de escaños por departamento
+- Vista detallada de distribución de escaños
 - Gráficos interactivos de resultados
 - Simulación de segunda vuelta cuando es necesario
 - Interfaz gráfica intuitiva con CustomTkinter
 - Temática boliviana con colores patrios
-
-## 🆕 **Nuevas Funcionalidades - Escaños Uninominales y Plurinominales**
 
 ### Implementación según la Ley 026 de Bolivia
 
@@ -56,11 +56,21 @@ Para ejecutar este proyecto, necesitas tener instalado:
 
 ## Instalación
 
+> **Nota:** Todos los comandos deben ejecutarse desde el directorio raíz del proyecto (`MiVoto_TSS`), donde se encuentran los archivos `requirements.txt` y la carpeta `src`.
+
 1. Clona este repositorio o descarga los archivos del proyecto:
 
-  https://github.com/AndreaQuelali/MiVoto_TSS.git
+```bash
+git clone https://github.com/AndreaQuelali/MiVoto_TSS.git
+```
 
-2. Crea un entorno virtual (recomendado):
+2. Ubícate en el directorio raíz del proyecto:
+
+```bash
+cd MiVoto_TSS
+```
+
+3. Crea un entorno virtual (recomendado):
 
 ```bash
 # En Windows
@@ -70,7 +80,7 @@ python -m venv venv
 python3 -m venv venv
 ```
 
-3. Activa el entorno virtual:
+4. Activa el entorno virtual:
 
 ```bash
 # En Windows (PowerShell)
@@ -79,14 +89,11 @@ python3 -m venv venv
 # En Windows (Command Prompt)
 .\venv\Scripts\activate.bat
 
-# En algunos casos funciona en windows con
-env\Scripts\activate
-
 # En Linux/Mac
 source venv/bin/activate
 ```
 
-4. Instala las dependencias necesarias usando pip y el archivo requirements.txt:
+5. Instala las dependencias necesarias usando pip y el archivo requirements.txt:
 
 ```bash
 pip install -r requirements.txt
