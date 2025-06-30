@@ -40,7 +40,7 @@ El sistema ahora incluye una implementación completa que diferencia entre:
 Para ejecutar este proyecto, necesitas tener instalado:
 
 - Python 3.6 o superior
-- Las siguientes bibliotecas de Python:
+- Las siguientes bibliotecas principales de Python (todas las dependencias, incluidas las indirectas, están en el archivo requirements.txt):
   - customtkinter
   - matplotlib
   - pandas
@@ -48,9 +48,17 @@ Para ejecutar este proyecto, necesitas tener instalado:
   - numpy
   - pillow
 
+> **Nota:** El archivo `requirements.txt` incluye todas las dependencias necesarias para el correcto funcionamiento del sistema, incluidas las requeridas por las librerías principales (por ejemplo: fonttools, kiwisolver, cycler, contourpy, pyparsing, python-dateutil, packaging, six, tzdata, et_xmlfile, entre otras). **Se recomienda instalar siempre usando:**
+>
+> ```bash
+> pip install -r requirements.txt
+> ```
+
 ## Instalación
 
-1. Clona este repositorio o descarga los archivos del proyecto
+1. Clona este repositorio o descarga los archivos del proyecto:
+
+  https://github.com/AndreaQuelali/MiVoto_TSS.git
 
 2. Crea un entorno virtual (recomendado):
 
@@ -71,7 +79,7 @@ python3 -m venv venv
 # En Windows (Command Prompt)
 .\venv\Scripts\activate.bat
 
-#en mi caso funciona en windows con
+# En algunos casos funciona en windows con
 env\Scripts\activate
 
 # En Linux/Mac
