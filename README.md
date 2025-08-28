@@ -132,7 +132,7 @@ python src/main.py
 - **NUEVO**: Implementación completa de la Ley 026 de Bolivia
 - **NUEVO**: Distribución realista de escaños uninominales por departamento
 
-## Estructura del Proyecto
+## Estructura
 
 ```
 .
